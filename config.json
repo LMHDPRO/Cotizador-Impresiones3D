@@ -1,0 +1,9 @@
+{
+  "negocio": "Mi Taller 3D",
+  "contacto": "",
+  "merma": 0.05,
+  "margen": 0.15,
+  "electricidad_kwh": 0.9,
+  "moneda": "MXN",
+  "tema": "dark"
+}

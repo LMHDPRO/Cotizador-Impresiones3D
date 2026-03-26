@@ -1,0 +1,156 @@
+[
+  {
+    "id": "c9bd2c88-b1e9-4e5a-b4bd-5e51a0c0fd46",
+    "name": "Bambu Lab X1 Carbon",
+    "brand": "Elegoo",
+    "model": "Centauri 2",
+    "type": "CoreXY",
+    "buildVolume": {
+      "x": 256.0,
+      "y": 256.0,
+      "z": 256.0
+    },
+    "maxSpeed": 500.0,
+    "maxTemp": 300.0,
+    "bedTemp": 120.0,
+    "avgPowerW": 380.0,
+    "costPerHour": 4.0,
+    "multicolor": true,
+    "colors": 4,
+    "amsType": "Canvas Hub",
+    "notes": "350³mm, CoreXY de alto rendimiento.",
+    "active": true
+  },
+  {
+    "id": "c9bd2c88-b1e9-4e5a-b4bd-5e51a0c0fd46",
+    "name": "Bambu Lab X1 Carbon",
+    "brand": "Elegoo",
+    "model": "Centauri 2",
+    "type": "CoreXY",
+    "buildVolume": {
+      "x": 256.0,
+      "y": 256.0,
+      "z": 256.0
+    },
+    "maxSpeed": 500.0,
+    "maxTemp": 300.0,
+    "bedTemp": 120.0,
+    "avgPowerW": 380.0,
+    "costPerHour": 4.0,
+    "multicolor": true,
+    "colors": 4,
+    "amsType": "Canvas Hub",
+    "notes": "350³mm, CoreXY de alto rendimiento.",
+    "active": true
+  },
+  {
+    "id": "c9bd2c88-b1e9-4e5a-b4bd-5e51a0c0fd46",
+    "name": "Bambu Lab X1 Carbon",
+    "brand": "Elegoo",
+    "model": "Centauri 2",
+    "type": "CoreXY",
+    "buildVolume": {
+      "x": 256.0,
+      "y": 256.0,
+      "z": 256.0
+    },
+    "maxSpeed": 500.0,
+    "maxTemp": 300.0,
+    "bedTemp": 120.0,
+    "avgPowerW": 380.0,
+    "costPerHour": 4.0,
+    "multicolor": true,
+    "colors": 4,
+    "amsType": "Canvas Hub",
+    "notes": "350³mm, CoreXY de alto rendimiento.",
+    "active": true
+  },
+  {
+    "id": "c9bd2c88-b1e9-4e5a-b4bd-5e51a0c0fd46",
+    "name": "Bambu Lab X1 Carbon",
+    "brand": "Elegoo",
+    "model": "Centauri 2",
+    "type": "CoreXY",
+    "buildVolume": {
+      "x": 256.0,
+      "y": 256.0,
+      "z": 256.0
+    },
+    "maxSpeed": 500.0,
+    "maxTemp": 300.0,
+    "bedTemp": 120.0,
+    "avgPowerW": 380.0,
+    "costPerHour": 4.0,
+    "multicolor": true,
+    "colors": 4,
+    "amsType": "Canvas Hub",
+    "notes": "350³mm, CoreXY de alto rendimiento.",
+    "active": true
+  },
+  {
+    "id": "c9bd2c88-b1e9-4e5a-b4bd-5e51a0c0fd46",
+    "name": "Bambu Lab X1 Carbon",
+    "brand": "Elegoo",
+    "model": "Centauri 2",
+    "type": "CoreXY",
+    "buildVolume": {
+      "x": 256.0,
+      "y": 256.0,
+      "z": 256.0
+    },
+    "maxSpeed": 500.0,
+    "maxTemp": 300.0,
+    "bedTemp": 120.0,
+    "avgPowerW": 380.0,
+    "costPerHour": 4.0,
+    "multicolor": true,
+    "colors": 4,
+    "amsType": "Canvas Hub",
+    "notes": "350³mm, CoreXY de alto rendimiento.",
+    "active": true
+  },
+  {
+    "id": "c9bd2c88-b1e9-4e5a-b4bd-5e51a0c0fd46",
+    "name": "Bambu Lab X1 Carbon",
+    "brand": "Elegoo",
+    "model": "Centauri 2",
+    "type": "CoreXY",
+    "buildVolume": {
+      "x": 256.0,
+      "y": 256.0,
+      "z": 256.0
+    },
+    "maxSpeed": 500.0,
+    "maxTemp": 300.0,
+    "bedTemp": 120.0,
+    "avgPowerW": 380.0,
+    "costPerHour": 4.0,
+    "multicolor": true,
+    "colors": 4,
+    "amsType": "Canvas Hub",
+    "notes": "350³mm, CoreXY de alto rendimiento.",
+    "active": true
+  },
+  {
+    "id": "c9bd2c88-b1e9-4e5a-b4bd-5e51a0c0fd46",
+    "name": "Bambu Lab X1 Carbon",
+    "brand": "Elegoo",
+    "model": "Centauri 2",
+    "type": "CoreXY",
+    "buildVolume": {
+      "x": 256.0,
+      "y": 256.0,
+      "z": 256.0
+    },
+    "maxSpeed": 500.0,
+    "maxTemp": 300.0,
+    "bedTemp": 120.0,
+    "avgPowerW": 380.0,
+    "costPerHour": 4.0,
+    "multicolor": true,
+    "colors": 4,
+    "amsType": "Canvas Hub",
+    "notes": "350³mm, CoreXY de alto rendimiento.",
+    "active": true
+  }
+]
