@@ -10,7 +10,7 @@ from modules.widgets import (
     Card, SubCard, ScrollArea, Divider,
     Label, SectionTitle, PageHeader, Tag,
     Entry, Dropdown, BtnPrimary, BtnGhost, BtnDanger,
-    T, font, confirm
+    T, font, confirm, dim, blend_color
 )
 from data.store import fmt, calc_item, new_id
 from data.constants import ORDER_STATUSES
@@ -24,15 +24,30 @@ class CotizadorTab(ctk.CTkFrame):
         self.items = []
         self._total = 0.0
         self._client_vars = {}
+
+        # FIX: construir el form en __init__, NO en refresh
         self._build()
 
     def refresh(self):
-        """Refresca dropdowns al volver a la pestaña."""
+        """
+        FIX CRÍTICO: refresh() solo actualizaba los ítems pero destruía
+        los frames internos que contienen los vars de cliente, dejando
+        self._client_vars apuntando a widgets destruidos.
+        Solución: refresh() solo re-renderiza la lista de ítems y recalcula.
+        El form completo (cliente + scroll) se construye una sola vez en _build().
+        """
         self._render_items()
         self._recalculate()
+        # Actualizar label de total con moneda/margen actuales
+        cfg = self.app.config
+        self.total_label.configure(
+            text=fmt(self._total, cfg["moneda"]))
+        # Actualizar subtítulo de merma/margen si cambió config
+        self._merma_label.configure(
+            text=f"Merma {cfg['merma']*100:.0f}%  ·  Margen {cfg['margen']*100:.0f}%")
 
     # ─────────────────────────────────────────────────────────
-    # CONSTRUCCIÓN INICIAL
+    # CONSTRUCCIÓN INICIAL (solo se llama una vez)
     # ─────────────────────────────────────────────────────────
 
     def _build(self):
@@ -103,22 +118,15 @@ class CotizadorTab(ctk.CTkFrame):
         )
         add_btn.pack(fill="x")
 
-        def _enter(e):
-            add_btn.configure(border_color=T("accent"), text_color=T("accent"))
-
-        def _leave(e):
-            add_btn.configure(border_color=T("border"), text_color=T("text_sub"))
-
-        add_btn.bind("<Enter>", _enter)
-        add_btn.bind("<Leave>", _leave)
+        add_btn.bind("<Enter>", lambda e: add_btn.configure(
+            border_color=T("accent"), text_color=T("accent")))
+        add_btn.bind("<Leave>", lambda e: add_btn.configure(
+            border_color=T("border"), text_color=T("text_sub")))
 
         # ── Total ──
         self.total_card = ctk.CTkFrame(
-            scroll,
-            fg_color=T("bg_card"),
-            corner_radius=12,
-            border_width=1,
-            border_color=T("accent_border"),
+            scroll, fg_color=T("bg_card"), corner_radius=12,
+            border_width=1, border_color=T("accent_border"),
         )
         self.total_card.pack(fill="x", pady=(8, 14))
 
@@ -128,10 +136,13 @@ class CotizadorTab(ctk.CTkFrame):
         left.pack(side="left")
         Label(left, "TOTAL DE COTIZACIÓN", size=12,
               bold=True, color=T("text_sub")).pack(anchor="w")
+
         cfg = self.app.config
-        Label(left,
-              f"Merma {cfg['merma']*100:.0f}%  ·  Margen {cfg['margen']*100:.0f}%",
-              size=11, color=T("text_dim")).pack(anchor="w")
+        self._merma_label = Label(
+            left,
+            f"Merma {cfg['merma']*100:.0f}%  ·  Margen {cfg['margen']*100:.0f}%",
+            size=11, color=T("text_dim"))
+        self._merma_label.pack(anchor="w")
 
         self.total_label = Label(
             tot_inner, fmt(0, cfg["moneda"]),
@@ -173,9 +184,12 @@ class CotizadorTab(ctk.CTkFrame):
         printers = [p for p in self.app.printers if p.get("active", True)]
         cfg      = self.app.config
 
-        mat_names = [f"{m['name']} — {fmt(m['costPerGram'], cfg['moneda'])}/g"
-                     for m in mats]
-        pr_names  = [p["name"] for p in printers]
+        # FIX: verificar que haya materiales/impresoras antes de formatear
+        mat_names = [
+            f"{m['name']} — {fmt(m.get('costPerGram', 0), cfg['moneda'])}/g"
+            for m in mats
+        ]
+        pr_names = [p["name"] for p in printers]
 
         for idx, item in enumerate(self.items):
             self._render_item(idx, item, mats, printers, mat_names, pr_names, cfg)
@@ -195,11 +209,11 @@ class CotizadorTab(ctk.CTkFrame):
         hr.pack(fill="x", padx=16, pady=(14, 10))
 
         num = ctk.CTkLabel(hr,
-                            text=f" #{idx + 1} ",
-                            font=font(11, "bold"),
-                            text_color=T("accent"),
-                            fg_color=T("accent") + "22",
-                            corner_radius=5)
+                           text=f" #{idx + 1} ",
+                           font=font(11, "bold"),
+                           text_color=T("accent"),
+                           fg_color=dim(T("accent")),
+                           corner_radius=5)
         num.pack(side="left", padx=(0, 10))
 
         name_var = ctk.StringVar(value=item["name"])
@@ -228,8 +242,9 @@ class CotizadorTab(ctk.CTkFrame):
         if mats:
             cur = next((m for m in mats if m["id"] == item["materialId"]), None)
             if cur:
-                mat_var.set(f"{cur['name']} — {fmt(cur['costPerGram'], cfg['moneda'])}/g")
+                mat_var.set(f"{cur['name']} — {fmt(cur.get('costPerGram', 0), cfg['moneda'])}/g")
             else:
+                # FIX: asignar el primero si no hay selección previa
                 mat_var.set(mat_names[0])
                 self.items[idx]["materialId"] = mats[0]["id"]
 
@@ -240,8 +255,13 @@ class CotizadorTab(ctk.CTkFrame):
                 self.items[i]["materialId"] = found["id"]
                 self._recalculate()
 
-        Dropdown(mf, mat_names or ["— Sin materiales —"],
-                 variable=mat_var, command=on_mat, width=220).pack()
+        Dropdown(
+            mf,
+            mat_names if mat_names else ["— Agrega materiales primero —"],
+            variable=mat_var,
+            command=on_mat if mat_names else None,
+            width=220
+        ).pack()
 
         # Impresora
         pf = ctk.CTkFrame(fr, fg_color="transparent")
@@ -251,8 +271,11 @@ class CotizadorTab(ctk.CTkFrame):
         pr_var = ctk.StringVar()
         if printers:
             cur_pr = next((p for p in printers if p["id"] == item["printerId"]), None)
-            pr_var.set(cur_pr["name"] if cur_pr else pr_names[0])
-            if not cur_pr:
+            if cur_pr:
+                pr_var.set(cur_pr["name"])
+            else:
+                # FIX: asignar el primero si no hay selección previa
+                pr_var.set(pr_names[0])
                 self.items[idx]["printerId"] = printers[0]["id"]
 
         def on_pr(ch, i=idx):
@@ -261,13 +284,18 @@ class CotizadorTab(ctk.CTkFrame):
                 self.items[i]["printerId"] = found["id"]
                 self._recalculate()
 
-        Dropdown(pf, pr_names or ["— Sin impresoras —"],
-                 variable=pr_var, command=on_pr, width=200).pack()
+        Dropdown(
+            pf,
+            pr_names if pr_names else ["— Agrega impresoras primero —"],
+            variable=pr_var,
+            command=on_pr if pr_names else None,
+            width=200
+        ).pack()
 
         # Peso, Tiempo, Cantidad
         for fkey, flbl, fw in [("weight", "Peso (g)", 80),
-                                 ("time",   "Tiempo (h)", 72),
-                                 ("qty",    "Cant.", 56)]:
+                                ("time",   "Tiempo (h)", 72),
+                                ("qty",    "Cant.", 56)]:
             nf = ctk.CTkFrame(fr, fg_color="transparent")
             nf.pack(side="left", padx=(0, 8))
             Label(nf, flbl, size=11, color=T("text_sub")).pack(anchor="w")
@@ -297,14 +325,17 @@ class CotizadorTab(ctk.CTkFrame):
 
         # ── Multicolor layers ─────────────────────────────
         if item["multicolor"]:
-            printer = next((p for p in self.app.printers if p["id"] == item["printerId"]), None)
-            max_slots = printer["colors"] if printer and printer.get("multicolor") else 2
+            printer = next((p for p in self.app.printers
+                            if p["id"] == item["printerId"]), None)
+            # FIX: default a 2 slots si la impresora no tiene multicolor
+            max_slots = (printer["colors"]
+                         if printer and printer.get("multicolor") else 2)
 
             mc_box = ctk.CTkFrame(item_card,
-                                   fg_color=T("bg_card2"),
-                                   corner_radius=9,
-                                   border_width=1,
-                                   border_color=T("accent_border"))
+                                  fg_color=T("bg_card2"),
+                                  corner_radius=9,
+                                  border_width=1,
+                                  border_color=T("accent_border"))
             mc_box.pack(fill="x", padx=16, pady=(0, 10))
             Label(mc_box, "🎨  Capas / Colores adicionales — purga por cambio",
                   size=11, color=T("accent")).pack(anchor="w", padx=12, pady=(10, 6))
@@ -317,18 +348,21 @@ class CotizadorTab(ctk.CTkFrame):
                       color=T("text_sub")).pack(side="left", padx=(0, 8))
 
                 lm_names = [m["name"] for m in mats]
-                lm_var = ctk.StringVar(value=next(
+                cur_layer_mat = next(
                     (m["name"] for m in mats if m["id"] == layer.get("materialId")),
-                    lm_names[0] if lm_names else ""))
+                    lm_names[0] if lm_names else "")
+                lm_var = ctk.StringVar(value=cur_layer_mat)
 
                 def on_layer_mat(ch, i=idx, l=li):
-                    found = next((m for m in self.app.materials if m["name"] == ch), None)
+                    found = next((m for m in self.app.materials
+                                  if m["name"] == ch), None)
                     if found:
                         self.items[i]["multicolorLayers"][l]["materialId"] = found["id"]
                         self._recalculate()
 
-                Dropdown(lr, lm_names or ["—"],
-                         variable=lm_var, command=on_layer_mat,
+                Dropdown(lr, lm_names if lm_names else ["—"],
+                         variable=lm_var,
+                         command=on_layer_mat if lm_names else None,
                          width=150).pack(side="left", padx=(0, 8))
 
                 pg_var = ctk.StringVar(value=str(layer.get("purgeGrams", 5)))
@@ -355,22 +389,38 @@ class CotizadorTab(ctk.CTkFrame):
             bd = ctk.CTkFrame(item_card, fg_color="transparent")
             bd.pack(fill="x", padx=16, pady=(0, 16))
             for i2, (lbl_txt, val, hi) in enumerate([
-                ("Costo Material",    c["costMaterial"],           False),
-                ("Costo Máquina",     c["costMachine"],            False),
-                ("Electricidad",      c["costElec"],               False),
-                ("Sub.+Merma",        c["subtotalMerma"],          False),
+                ("Costo Material",    c["costMaterial"],               False),
+                ("Costo Máquina",     c["costMachine"],                False),
+                ("Electricidad",      c["costElec"],                   False),
+                ("Sub.+Merma",        c["subtotalMerma"],              False),
                 (f"Precio ×{item['qty']}", c["precioFinal"] * item["qty"], True),
             ]):
                 bc = ctk.CTkFrame(bd,
-                                   fg_color=T("accent_dim") if hi else T("bg_card2"),
-                                   border_width=1,
-                                   border_color=T("accent_border") if hi else T("border"),
-                                   corner_radius=8)
+                                  fg_color=T("accent_dim") if hi else T("bg_card2"),
+                                  border_width=1,
+                                  border_color=T("accent_border") if hi else T("border"),
+                                  corner_radius=8)
                 bc.grid(row=0, column=i2, padx=4, sticky="ew")
                 bd.columnconfigure(i2, weight=1)
-                Label(bc, lbl_txt, size=10, color=T("text_sub")).pack(anchor="w", padx=10, pady=(8, 2))
+                Label(bc, lbl_txt, size=10,
+                      color=T("text_sub")).pack(anchor="w", padx=10, pady=(8, 2))
                 Label(bc, fmt(val, cfg["moneda"]), size=12, bold=True,
-                      color=T("accent") if hi else T("text")).pack(anchor="w", padx=10, pady=(0, 8))
+                      color=T("accent") if hi else T("text")).pack(
+                    anchor="w", padx=10, pady=(0, 8))
+        else:
+            # FIX: mostrar aviso cuando faltan material o impresora
+            if not mats or not printers:
+                hint = ctk.CTkFrame(item_card, fg_color=T("yellow_dim"),
+                                    corner_radius=7)
+                hint.pack(fill="x", padx=16, pady=(0, 12))
+                msg = []
+                if not mats:
+                    msg.append("materiales")
+                if not printers:
+                    msg.append("impresoras activas")
+                Label(hint,
+                      f"⚠️  Agrega {' y '.join(msg)} para calcular el costo",
+                      size=11, color=T("yellow")).pack(padx=10, pady=8)
 
     # ─────────────────────────────────────────────────────────
     # ACTUALIZACIONES
@@ -422,7 +472,11 @@ class CotizadorTab(ctk.CTkFrame):
             if c:
                 total += c["precioFinal"] * int(item.get("qty", 1))
         self._total = round(total, 2)
-        self.total_label.configure(text=fmt(self._total, cfg["moneda"]))
+        # FIX: verificar que total_label aún existe (puede haberse destruido en rebuild)
+        try:
+            self.total_label.configure(text=fmt(self._total, cfg["moneda"]))
+        except Exception:
+            pass
 
     # ─────────────────────────────────────────────────────────
     # GUARDAR / LIMPIAR
@@ -433,14 +487,21 @@ class CotizadorTab(ctk.CTkFrame):
             self.app.toast("⚠️ Agrega al menos una pieza", ok=False)
             return
 
+        # FIX: verificar que hay material e impresora en cada pieza
         cfg = self.app.config
+        for i, item in enumerate(self.items, 1):
+            if not item.get("materialId") or not item.get("printerId"):
+                self.app.toast(
+                    f"⚠️ Pieza {i}: selecciona material e impresora", ok=False)
+                return
+
         order = {
             "id":          new_id(),
             "folio":       f"ORD-{len(self.app.orders) + 1:04d}",
-            "clientName":  self._client_vars["clientName"].get(),
-            "clientEmail": self._client_vars["clientEmail"].get(),
-            "clientPhone": self._client_vars["clientPhone"].get(),
-            "notes":       self._client_vars["notes"].get(),
+            "clientName":  self._client_vars["clientName"].get().strip(),
+            "clientEmail": self._client_vars["clientEmail"].get().strip(),
+            "clientPhone": self._client_vars["clientPhone"].get().strip(),
+            "notes":       self._client_vars["notes"].get().strip(),
             "items":       list(self.items),
             "total":       self._total,
             "status":      "pending",

@@ -28,15 +28,14 @@ class ImpresorasTab(ctk.CTkFrame):
         self._build()
 
     def _build(self):
-        # Header
         hdr = ctk.CTkFrame(self, fg_color="transparent")
         hdr.pack(fill="x", padx=30, pady=(26, 0))
         Label(hdr, "Impresoras", size=26, bold=True,
               color=T("text_bright")).pack(side="left")
-        lbl_sub = Label(hdr,
-                        f"{len(self.app.printers)} perfiles  ·  {sum(1 for p in self.app.printers if p.get('active',True))} activas",
-                        size=12, color=T("text_sub"))
-        lbl_sub.pack(side="left", padx=14, pady=(6, 0))
+        n_activas = sum(1 for p in self.app.printers if p.get("active", True))
+        Label(hdr,
+              f"{len(self.app.printers)} perfiles  ·  {n_activas} activas",
+              size=12, color=T("text_sub")).pack(side="left", padx=14, pady=(6, 0))
         BtnPrimary(hdr, "Nueva Impresora", self._add_new,
                    icon="＋", width=170).pack(side="right")
 
@@ -44,8 +43,14 @@ class ImpresorasTab(ctk.CTkFrame):
         scroll.pack(fill="both", expand=True, padx=30, pady=14)
 
         if not self.app.printers:
-            Label(scroll, "Sin impresoras. Agrega la primera →",
-                  size=14, color=T("text_sub")).pack(pady=60)
+            empty = ctk.CTkFrame(scroll, fg_color=T("bg_card"),
+                                 corner_radius=12)
+            empty.pack(fill="x", pady=40)
+            Label(empty, "🖨️", size=40).pack(pady=(30, 8))
+            Label(empty, "Sin impresoras todavía", size=16,
+                  bold=True, color=T("text_bright")).pack()
+            Label(empty, "Haz clic en «Nueva Impresora» para agregar la primera",
+                  size=13, color=T("text_sub")).pack(pady=(4, 30))
             return
 
         grid = ctk.CTkFrame(scroll, fg_color="transparent")
@@ -64,7 +69,6 @@ class ImpresorasTab(ctk.CTkFrame):
         brand  = p.get("brand", "Personalizada")
         bc     = brand_color(brand, self.app.theme_mode)
 
-        # Header
         hr = ctk.CTkFrame(parent, fg_color="transparent")
         hr.pack(fill="x", padx=14, pady=(14, 8))
 
@@ -75,11 +79,12 @@ class ImpresorasTab(ctk.CTkFrame):
             Tag(tag_row, f"🎨 {p.get('amsType','AMS')}  {p.get('colors',1)} col.",
                 T("accent")).pack(side="left", padx=4)
         Tag(tag_row, p.get("type", "CoreXY"), T("text_sub")).pack(side="left", padx=4)
+        if not active:
+            Tag(tag_row, "Inactiva", T("red")).pack(side="left", padx=4)
 
         btn_row = ctk.CTkFrame(hr, fg_color="transparent")
         btn_row.pack(side="right")
 
-        # Botón activa/inactiva
         act_color = T("green") if active else T("red")
         act_text  = "● Activa" if active else "○ Inactiva"
         BtnGhost(btn_row, act_text,
@@ -90,10 +95,8 @@ class ImpresorasTab(ctk.CTkFrame):
         BtnDanger(btn_row, "🗑️",
                   lambda pid=p["id"]: self._delete(pid), width=38).pack(side="left", padx=3)
 
-        # Nombre
         Label(hr, p.get("name", "—"), size=16, bold=True).pack(anchor="w")
 
-        # Info grid
         bv = p.get("buildVolume", {})
         info_grid = ctk.CTkFrame(parent, fg_color="transparent")
         info_grid.pack(fill="x", padx=14, pady=(0, 14))
@@ -107,15 +110,13 @@ class ImpresorasTab(ctk.CTkFrame):
             ("Temp. cama",  f"{p.get('bedTemp',0)}°C"),
         ]
         for j, (k, v) in enumerate(infos):
-            row2 = j // 3
-            col2 = j % 3
-            ic = ctk.CTkFrame(info_grid,
-                               fg_color=T("bg_card2"),
-                               corner_radius=7,
-                               border_width=1,
-                               border_color=T("border"))
-            ic.grid(row=row2, column=col2, padx=3, pady=3, sticky="ew")
-            info_grid.columnconfigure(col2, weight=1)
+            r2 = j // 3
+            c2 = j % 3
+            ic = ctk.CTkFrame(info_grid, fg_color=T("bg_card2"),
+                              corner_radius=7, border_width=1,
+                              border_color=T("border"))
+            ic.grid(row=r2, column=c2, padx=3, pady=3, sticky="ew")
+            info_grid.columnconfigure(c2, weight=1)
             Label(ic, k, size=10, color=T("text_sub")).pack(anchor="w", padx=8, pady=(6, 1))
             Label(ic, v, size=12, bold=True).pack(anchor="w", padx=8, pady=(0, 6))
 
@@ -139,7 +140,8 @@ class ImpresorasTab(ctk.CTkFrame):
     def _delete(self, pid):
         p = next((p for p in self.app.printers if p["id"] == pid), None)
         name = p["name"] if p else "esta impresora"
-        if not confirm(self, "Eliminar impresora", f"¿Eliminar '{name}'? Esta acción no se puede deshacer."):
+        if not confirm(self, "Eliminar impresora",
+                       f"¿Eliminar '{name}'? Esta acción no se puede deshacer."):
             return
         self.app.printers = [p for p in self.app.printers if p["id"] != pid]
         self.app.save_printers()
@@ -155,7 +157,7 @@ class ImpresorasTab(ctk.CTkFrame):
             self._open_editor(p)
 
     # ─────────────────────────────────────────────────────────
-    # EDITOR MODAL
+    # EDITOR MODAL — Completamente reescrito para corregir bugs
     # ─────────────────────────────────────────────────────────
 
     def _open_editor(self, printer):
@@ -174,66 +176,37 @@ class ImpresorasTab(ctk.CTkFrame):
 
         dlg = ctk.CTkToplevel(self)
         dlg.title("Nueva Impresora" if is_new else f"Editar — {printer['name']}")
-        dlg.geometry("620x700")
+        dlg.geometry("640x720")
         dlg.configure(fg_color=T("bg"))
         dlg.grab_set()
         dlg.resizable(True, True)
+        # FIX: asegurarse de que el modal aparece al frente
+        dlg.lift()
+        dlg.focus_force()
 
-        sf = ctk.CTkScrollableFrame(dlg, fg_color=T("bg"),
-                                     scrollbar_button_color=T("scrollbar"),
-                                     scrollbar_button_hover_color=T("text_sub"))
+        sf = ctk.CTkScrollableFrame(
+            dlg, fg_color=T("bg"),
+            scrollbar_button_color=T("scrollbar"),
+            scrollbar_button_hover_color=T("text_sub"))
         sf.pack(fill="both", expand=True, padx=22, pady=18)
 
         Label(sf, "Nueva Impresora" if is_new else "Editar Impresora",
               size=18, bold=True, color=T("text_bright")).pack(anchor="w", pady=(0, 16))
 
-        vars_ = {}
+        # ── Variables de estado ──────────────────────────────
+        brand_names    = list(PRINTER_BRANDS.keys())
+        cur_brand      = printer.get("brand", brand_names[0])
+        cur_models_all = list(PRINTER_BRANDS.get(cur_brand, {}).get("models", {}).keys())
+        cur_model      = printer.get("model", cur_models_all[0] if cur_models_all else "")
 
-        # ── Marca y Modelo ──────────────────────────────────
-        brand_card = Card(sf)
-        brand_card.pack(fill="x", pady=(0, 12))
-        SectionTitle(brand_card, "🏭  MARCA Y MODELO")
-
-        brand_row = ctk.CTkFrame(brand_card, fg_color="transparent")
-        brand_row.pack(fill="x", padx=16, pady=(0, 14))
-        brand_row.columnconfigure(0, weight=1)
-        brand_row.columnconfigure(1, weight=2)
-
-        # Marca
-        bf = ctk.CTkFrame(brand_row, fg_color="transparent")
-        bf.grid(row=0, column=0, padx=(0, 10), sticky="ew")
-        Label(bf, "Marca", size=11, color=T("text_sub")).pack(anchor="w")
-        brand_names = list(PRINTER_BRANDS.keys())
-        brand_var = ctk.StringVar(value=printer.get("brand", "Bambu Lab"))
-        vars_["brand"] = brand_var
-
-        # Modelo
-        mf = ctk.CTkFrame(brand_row, fg_color="transparent")
-        mf.grid(row=0, column=1, sticky="ew")
-        Label(mf, "Modelo", size=11, color=T("text_sub")).pack(anchor="w")
-
-        model_names_var = ctk.StringVar(value=printer.get("model", ""))
-        vars_["model"] = model_names_var
-
-        # Preview specs
-        specs_label = Label(sf, "", size=11, color=T("text_sub"))
-        specs_label.pack(anchor="w", padx=16, pady=(0, 8))
-
-        # Nombre personalizado
-        nc = ctk.CTkFrame(brand_card, fg_color="transparent")
-        nc.pack(fill="x", padx=16, pady=(0, 14))
-        Label(nc, "Nombre para mostrar (editable)", size=11, color=T("text_sub")).pack(anchor="w")
-        name_var = ctk.StringVar(value=printer.get("name", ""))
-        vars_["name"] = name_var
-        Entry(nc, textvariable=name_var, placeholder_text="Ej: Mi X1C del taller").pack(fill="x")
-
-        # ── Actualizar modelos al cambiar marca ──────────────
-        model_dd_holder = [None]
-        cost_var   = ctk.StringVar(value=str(printer.get("costPerHour", 4.0)))
-        avg_pw_var = ctk.StringVar(value=str(printer.get("avgPowerW", 350)))
-        bv_x = ctk.StringVar(value=str(printer.get("buildVolume", {}).get("x", 256)))
-        bv_y = ctk.StringVar(value=str(printer.get("buildVolume", {}).get("y", 256)))
-        bv_z = ctk.StringVar(value=str(printer.get("buildVolume", {}).get("z", 256)))
+        brand_var      = ctk.StringVar(value=cur_brand)
+        model_var      = ctk.StringVar(value=cur_model)
+        name_var       = ctk.StringVar(value=printer.get("name", ""))
+        cost_var       = ctk.StringVar(value=str(printer.get("costPerHour", 4.0)))
+        avg_pw_var     = ctk.StringVar(value=str(printer.get("avgPowerW", 350)))
+        bv_x           = ctk.StringVar(value=str(printer.get("buildVolume", {}).get("x", 256)))
+        bv_y           = ctk.StringVar(value=str(printer.get("buildVolume", {}).get("y", 256)))
+        bv_z           = ctk.StringVar(value=str(printer.get("buildVolume", {}).get("z", 256)))
         max_speed_var  = ctk.StringVar(value=str(printer.get("maxSpeed", 500)))
         max_temp_var   = ctk.StringVar(value=str(printer.get("maxTemp", 300)))
         bed_temp_var   = ctk.StringVar(value=str(printer.get("bedTemp", 120)))
@@ -243,21 +216,35 @@ class ImpresorasTab(ctk.CTkFrame):
         type_var       = ctk.StringVar(value=printer.get("type", "CoreXY"))
         notes_var      = ctk.StringVar(value=printer.get("notes", ""))
 
-        vars_.update({
-            "costPerHour": cost_var,
-            "avgPowerW":   avg_pw_var,
-            "bv_x": bv_x, "bv_y": bv_y, "bv_z": bv_z,
-            "maxSpeed": max_speed_var,
-            "maxTemp":  max_temp_var,
-            "bedTemp":  bed_temp_var,
-            "multicolor": mc_var,
-            "colors":   colors_var,
-            "amsType":  ams_var,
-            "type":     type_var,
-            "notes":    notes_var,
-        })
+        # ── Marca y Modelo ──────────────────────────────────
+        brand_card = Card(sf)
+        brand_card.pack(fill="x", pady=(0, 12))
+        SectionTitle(brand_card, "🏭  MARCA Y MODELO")
+
+        brand_row = ctk.CTkFrame(brand_card, fg_color="transparent")
+        brand_row.pack(fill="x", padx=16, pady=(0, 8))
+        brand_row.columnconfigure(0, weight=1)
+        brand_row.columnconfigure(1, weight=2)
+
+        bf = ctk.CTkFrame(brand_row, fg_color="transparent")
+        bf.grid(row=0, column=0, padx=(0, 10), sticky="ew")
+        Label(bf, "Marca", size=11, color=T("text_sub")).pack(anchor="w")
+
+        mf = ctk.CTkFrame(brand_row, fg_color="transparent")
+        mf.grid(row=0, column=1, sticky="ew")
+        Label(mf, "Modelo", size=11, color=T("text_sub")).pack(anchor="w")
+
+        # FIX: specs_label DESPUÉS de las secciones que lo usan
+        # Se crea aquí como referencia pero se empaca después
+        specs_label = ctk.CTkLabel(
+            brand_card, text="",
+            font=font(11), text_color=T("text_sub"))
+        
+        # Contenedor de modelo con referencia mutable
+        model_dd_holder = [None]
 
         def apply_preset(brand: str, model: str):
+            """Carga specs del preset y actualiza todos los campos."""
             try:
                 specs = PRINTER_BRANDS[brand]["models"][model]
                 cost_var.set(str(specs["costPerHour"]))
@@ -273,50 +260,71 @@ class ImpresorasTab(ctk.CTkFrame):
                 ams_var.set(specs["amsType"])
                 type_var.set(specs["type"])
                 notes_var.set(specs["notes"])
-                # Nombre auto
                 if not name_var.get():
                     name_var.set(f"{brand} {model}")
                 specs_label.configure(
-                    text=f"✓ Specs cargadas: {specs['buildVolume']['x']}×"
+                    text=f"✓ {specs['buildVolume']['x']}×"
                          f"{specs['buildVolume']['y']}×{specs['buildVolume']['z']}mm  "
                          f"·  {specs['maxSpeed']}mm/s  ·  {specs['avgPowerW']}W",
                     text_color=T("green"),
                 )
             except KeyError:
-                pass
+                specs_label.configure(text="", text_color=T("text_sub"))
 
         def update_models(brand: str):
+            """Actualiza el dropdown de modelos al cambiar marca."""
             models = list(PRINTER_BRANDS.get(brand, {}).get("models", {}).keys())
-            if model_dd_holder[0]:
+            if not models:
+                models = ["Personalizada"]
+            if model_dd_holder[0] is not None:
                 model_dd_holder[0].configure(values=models)
-                if models:
-                    model_names_var.set(models[0])
-                    apply_preset(brand, models[0])
+                model_var.set(models[0])
+                apply_preset(brand, models[0])
 
         def on_brand(ch):
-            vars_["brand"].set(ch)
+            brand_var.set(ch)
             update_models(ch)
 
         def on_model(ch):
-            brand = vars_["brand"].get()
-            apply_preset(brand, ch)
+            model_var.set(ch)
+            apply_preset(brand_var.get(), ch)
 
-        # Crear dropdowns
-        brand_dd = Dropdown(bf, brand_names, variable=brand_var, command=on_brand, width=160)
-        brand_dd.pack()
+        # Crear dropdown de marca
+        brand_dd = Dropdown(bf, brand_names, variable=brand_var,
+                            command=on_brand, width=160)
+        brand_dd.pack(fill="x")
 
-        cur_brand = printer.get("brand", "Bambu Lab")
+        # Crear dropdown de modelo con los modelos de la marca actual
         cur_models = list(PRINTER_BRANDS.get(cur_brand, {}).get("models", {}).keys())
-        model_dd = Dropdown(mf, cur_models or ["Personalizada"],
-                            variable=model_names_var, command=on_model, width=210)
-        model_dd.pack()
+        if not cur_models:
+            cur_models = ["Personalizada"]
+
+        # FIX: asegurar que el modelo actual esté en la lista
+        if cur_model not in cur_models:
+            cur_model = cur_models[0]
+            model_var.set(cur_model)
+
+        model_dd = Dropdown(mf, cur_models, variable=model_var,
+                            command=on_model, width=210)
+        model_dd.pack(fill="x")
         model_dd_holder[0] = model_dd
+
+        # Empacar specs_label después de los dropdowns
+        specs_label.pack(anchor="w", padx=16, pady=(4, 6))
+
+        # Nombre personalizado
+        nc = ctk.CTkFrame(brand_card, fg_color="transparent")
+        nc.pack(fill="x", padx=16, pady=(0, 14))
+        Label(nc, "Nombre para mostrar (editable)", size=11,
+              color=T("text_sub")).pack(anchor="w")
+        Entry(nc, textvariable=name_var,
+              placeholder_text="Ej: Mi X1C del taller").pack(fill="x")
 
         # Si es nueva, cargar specs del preset inicial
         if is_new and cur_models:
             apply_preset(cur_brand, cur_models[0])
 
-        # ── Parámetros técnicos ─────────────────────────────
+        # ── Parámetros técnicos ──────────────────────────────
         tech_card = Card(sf)
         tech_card.pack(fill="x", pady=(0, 12))
         SectionTitle(tech_card, "⚙️  PARÁMETROS TÉCNICOS")
@@ -327,29 +335,29 @@ class ImpresorasTab(ctk.CTkFrame):
             tech_grid.columnconfigure(i, weight=1)
 
         tech_fields = [
-            ("costPerHour",  cost_var,      "Costo / hora ($)",       0, 0),
-            ("avgPowerW",    avg_pw_var,    "Consumo promedio (W)",   0, 1),
-            ("type",         type_var,      "Tipo de cinemática",     0, 2),
-            ("maxSpeed",     max_speed_var, "Vel. máx. (mm/s)",       1, 0),
-            ("maxTemp",      max_temp_var,  "Temp. ext. máx. (°C)",   1, 1),
-            ("bedTemp",      bed_temp_var,  "Temp. cama máx. (°C)",   1, 2),
+            (cost_var,      "Costo / hora ($)",      0, 0, False),
+            (avg_pw_var,    "Consumo promedio (W)",   0, 1, False),
+            (type_var,      "Tipo de cinemática",     0, 2, True),
+            (max_speed_var, "Vel. máx. (mm/s)",       1, 0, False),
+            (max_temp_var,  "Temp. ext. máx. (°C)",   1, 1, False),
+            (bed_temp_var,  "Temp. cama máx. (°C)",   1, 2, False),
         ]
-        for k, v, lbl_text, row, col in tech_fields:
+        for v, lbl_text, row, col, is_dd in tech_fields:
             f = ctk.CTkFrame(tech_grid, fg_color="transparent")
             f.grid(row=row, column=col, padx=5, pady=5, sticky="ew")
             Label(f, lbl_text, size=11, color=T("text_sub")).pack(anchor="w")
-            if k == "type":
+            if is_dd:
                 Dropdown(f, ["CoreXY", "Cartesiana", "Delta", "SCARA", "Polar"],
                          variable=v, width=160).pack(fill="x")
             else:
                 Entry(f, textvariable=v).pack(fill="x")
 
-        # Volumen
-        bv_row2 = ctk.CTkFrame(tech_card, fg_color="transparent")
-        bv_row2.pack(fill="x", padx=16, pady=(0, 14))
-        Label(bv_row2, "Volumen de construcción (mm)", size=11,
+        # Volumen de construcción
+        bv_row = ctk.CTkFrame(tech_card, fg_color="transparent")
+        bv_row.pack(fill="x", padx=16, pady=(0, 14))
+        Label(bv_row, "Volumen de construcción (mm)", size=11,
               color=T("text_sub")).pack(anchor="w", pady=(0, 4))
-        bv_inner = ctk.CTkFrame(bv_row2, fg_color="transparent")
+        bv_inner = ctk.CTkFrame(bv_row, fg_color="transparent")
         bv_inner.pack(anchor="w")
         for axis, var in [("X", bv_x), ("Y", bv_y), ("Z", bv_z)]:
             af = ctk.CTkFrame(bv_inner, fg_color="transparent")
@@ -380,10 +388,10 @@ class ImpresorasTab(ctk.CTkFrame):
         Label(sf2, "Slots / Colores", size=11, color=T("text_sub")).pack(anchor="w")
         Entry(sf2, textvariable=colors_var, width=70).pack(anchor="w")
 
-        af = ctk.CTkFrame(mc_inner, fg_color="transparent")
-        af.grid(row=0, column=2, sticky="ew")
-        Label(af, "Sistema AMS / Multi", size=11, color=T("text_sub")).pack(anchor="w")
-        Dropdown(af, AMS_TYPES, variable=ams_var, width=150).pack(anchor="w")
+        af2 = ctk.CTkFrame(mc_inner, fg_color="transparent")
+        af2.grid(row=0, column=2, sticky="ew")
+        Label(af2, "Sistema AMS / Multi", size=11, color=T("text_sub")).pack(anchor="w")
+        Dropdown(af2, AMS_TYPES, variable=ams_var, width=150).pack(anchor="w")
 
         # ── Notas ────────────────────────────────────────────
         nt_card = Card(sf)
@@ -399,26 +407,31 @@ class ImpresorasTab(ctk.CTkFrame):
 
         def save():
             try:
+                # FIX: validar campos numéricos antes de convertir
+                name = name_var.get().strip()
+                if not name:
+                    name = f"{brand_var.get()} {model_var.get()}"
+
                 data = {
                     "id":    printer["id"],
-                    "name":  vars_["name"].get().strip() or f"{vars_['brand'].get()} {vars_['model'].get()}",
-                    "brand": vars_["brand"].get(),
-                    "model": vars_["model"].get(),
-                    "type":  vars_["type"].get(),
+                    "name":  name,
+                    "brand": brand_var.get(),
+                    "model": model_var.get(),
+                    "type":  type_var.get(),
                     "buildVolume": {
-                        "x": float(vars_["bv_x"].get()),
-                        "y": float(vars_["bv_y"].get()),
-                        "z": float(vars_["bv_z"].get()),
+                        "x": float(bv_x.get() or 0),
+                        "y": float(bv_y.get() or 0),
+                        "z": float(bv_z.get() or 0),
                     },
-                    "maxSpeed":    float(vars_["maxSpeed"].get()),
-                    "maxTemp":     float(vars_["maxTemp"].get()),
-                    "bedTemp":     float(vars_["bedTemp"].get()),
-                    "avgPowerW":   float(vars_["avgPowerW"].get()),
-                    "costPerHour": float(vars_["costPerHour"].get()),
-                    "multicolor":  vars_["multicolor"].get(),
-                    "colors":      int(vars_["colors"].get()),
-                    "amsType":     vars_["amsType"].get(),
-                    "notes":       vars_["notes"].get(),
+                    "maxSpeed":    float(max_speed_var.get() or 0),
+                    "maxTemp":     float(max_temp_var.get() or 0),
+                    "bedTemp":     float(bed_temp_var.get() or 0),
+                    "avgPowerW":   float(avg_pw_var.get() or 0),
+                    "costPerHour": float(cost_var.get() or 0),
+                    "multicolor":  bool(mc_var.get()),
+                    "colors":      int(float(colors_var.get() or 1)),
+                    "amsType":     ams_var.get(),
+                    "notes":       notes_var.get().strip(),
                     "active":      printer.get("active", True),
                 }
                 if is_new:

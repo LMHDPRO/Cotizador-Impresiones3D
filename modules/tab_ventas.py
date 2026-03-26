@@ -11,7 +11,7 @@ from modules.widgets import (
     Card, ScrollArea, Divider,
     Label, SectionTitle, PageHeader, Tag,
     Entry, Dropdown, BtnPrimary, BtnGhost, BtnDanger, BtnSuccess,
-    KpiCard, T, font, confirm
+    KpiCard, T, font, confirm, dim, blend_color
 )
 from data.store import fmt, calc_item
 from data.constants import ORDER_STATUSES
@@ -72,7 +72,7 @@ class VentasTab(ctk.CTkFrame):
             rc = ctk.CTkFrame(rev_row,
                                fg_color=T("bg_card"),
                                border_width=1,
-                               border_color=border_col + "30",
+                               border_color=blend_color(border_col, 0.19),
                                corner_radius=12)
             rc.grid(row=0, column=col_i, padx=5, sticky="ew")
             Label(rc, lbl_text, size=11, color=T("text_sub")).pack(anchor="w", padx=16, pady=(12, 4))
@@ -94,7 +94,7 @@ class VentasTab(ctk.CTkFrame):
             ctk.CTkButton(
                 fil_row, text=flbl,
                 command=lambda f=fid: self._set_filter(f),
-                fg_color=T("accent") + "22" if is_active else "transparent",
+                fg_color=dim(T("accent")) if is_active else "transparent",
                 border_width=1,
                 border_color=T("accent") if is_active else T("border"),
                 text_color=T("accent") if is_active else T("text_sub"),
@@ -183,7 +183,7 @@ class VentasTab(ctk.CTkFrame):
         ctk.CTkOptionMenu(
             right, values=st_names, variable=st_var,
             command=on_status_change,
-            fg_color=st_info["color"] + "22",
+            fg_color=dim(st_info["color"]),
             button_color=T("border"),
             button_hover_color=T("bg_hover"),
             text_color=st_info["color"],
