@@ -1,0 +1,2053 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Print3D Pro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+/* ═══════════════════════════════════════════════════════
+   VARIABLES DE TEMA
+═══════════════════════════════════════════════════════ */
+:root {
+  --bg:           #0a0a0a;
+  --bg-sidebar:   #0d0d0d;
+  --bg-card:      #141414;
+  --bg-card2:     #0f0f0f;
+  --bg-input:     #0d0d0d;
+  --bg-hover:     #1c1c1c;
+  --bg-selected:  #191919;
+  --border:       #222;
+  --border2:      #2a2a2a;
+  --text:         #e0e0e0;
+  --text-sub:     #666;
+  --text-dim:     #3a3a3a;
+  --text-bright:  #fff;
+  --accent:       #ff6b35;
+  --accent-h:     #cc5225;
+  --accent-dim:   #ff6b3518;
+  --accent-b:     #ff6b3540;
+  --green:        #4ade80;
+  --yellow:       #fbbf24;
+  --blue:         #60a5fa;
+  --red:          #f87171;
+  --purple:       #a78bfa;
+  --radius:       11px;
+  --radius-sm:    7px;
+  --transition:   0.15s ease;
+}
+
+[data-theme="light"] {
+  --bg:           #f0f0f0;
+  --bg-sidebar:   #e6e6e6;
+  --bg-card:      #ffffff;
+  --bg-card2:     #f5f5f5;
+  --bg-input:     #ffffff;
+  --bg-hover:     #ebebeb;
+  --bg-selected:  #e8e8e8;
+  --border:       #d4d4d4;
+  --border2:      #c4c4c4;
+  --text:         #1a1a1a;
+  --text-sub:     #777;
+  --text-dim:     #bbb;
+  --text-bright:  #000;
+  --accent:       #e85d24;
+  --accent-h:     #c44c1a;
+  --accent-dim:   #e85d2412;
+  --accent-b:     #e85d2440;
+  --green:        #16a34a;
+  --yellow:       #d97706;
+  --blue:         #2563eb;
+  --red:          #dc2626;
+  --purple:       #7c3aed;
+}
+
+/* ═══════════════════════════════════════════════════════
+   RESET & BASE
+═══════════════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  overflow: hidden;
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', system-ui, sans-serif;
+  font-size: 13px;
+  -webkit-font-smoothing: antialiased;
+}
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+/* ═══════════════════════════════════════════════════════
+   LAYOUT
+═══════════════════════════════════════════════════════ */
+#app { display: flex; height: 100vh; }
+
+/* ── Sidebar ── */
+#sidebar {
+  width: 220px;
+  flex-shrink: 0;
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.sidebar-logo {
+  padding: 22px 18px 14px;
+  border-bottom: 1px solid var(--border);
+}
+.sidebar-logo .brand {
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--accent);
+  letter-spacing: -0.3px;
+}
+.sidebar-logo .biz-name {
+  font-size: 11px;
+  color: var(--text-sub);
+  margin-top: 3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+nav { flex: 1; padding: 10px 0; overflow-y: auto; }
+
+.nav-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 18px;
+  background: transparent;
+  border: none;
+  border-left: 2px solid transparent;
+  color: var(--text-sub);
+  font: 500 13px/1 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: all var(--transition);
+  text-align: left;
+}
+.nav-btn:hover { background: var(--bg-hover); color: var(--text); }
+.nav-btn.active {
+  background: var(--bg-selected);
+  color: var(--accent);
+  border-left-color: var(--accent);
+  font-weight: 600;
+}
+.nav-btn .nav-icon { font-size: 15px; flex-shrink: 0; }
+
+.sidebar-footer {
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.theme-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+}
+.theme-toggle .icon { font-size: 16px; }
+.theme-toggle .lbl { font-size: 11px; color: var(--text-sub); flex: 1; }
+
+/* Toggle switch */
+.switch {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  flex-shrink: 0;
+}
+.switch input { opacity: 0; width: 0; height: 0; }
+.switch-track {
+  position: absolute;
+  inset: 0;
+  background: var(--border2);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: background var(--transition);
+}
+.switch input:checked + .switch-track { background: var(--accent); }
+.switch-track::after {
+  content: '';
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 18px; height: 18px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform var(--transition);
+}
+.switch input:checked + .switch-track::after { transform: translateX(20px); }
+
+.sidebar-version { font-size: 10px; color: var(--text-dim); }
+
+/* ── Content ── */
+#content { flex: 1; overflow: hidden; background: var(--bg); }
+
+.tab-view {
+  display: none;
+  height: 100%;
+  overflow-y: auto;
+  padding: 28px 30px;
+  animation: fadeIn 0.18s ease;
+}
+.tab-view.active { display: flex; flex-direction: column; }
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+
+/* ═══════════════════════════════════════════════════════
+   COMPONENTES BASE
+═══════════════════════════════════════════════════════ */
+
+/* Page header */
+.page-header { margin-bottom: 24px; }
+.page-header h1 { font-size: 24px; font-weight: 800; color: var(--text-bright); letter-spacing: -0.4px; }
+.page-header p { font-size: 12px; color: var(--text-sub); margin-top: 3px; }
+
+/* Cards */
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+}
+.card-tight { padding: 12px 16px; }
+
+/* Section label */
+.section-lbl {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-sub);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+
+/* Grid */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+.grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+
+/* Row flex */
+.row { display: flex; align-items: center; gap: 10px; }
+.row-between { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+
+/* Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+/* Buttons */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font: 600 12px/1 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: all var(--transition);
+  white-space: nowrap;
+}
+.btn:active { transform: scale(0.97); }
+.btn-primary { background: var(--accent); color: #fff; }
+.btn-primary:hover { background: var(--accent-h); }
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--border2);
+  color: var(--text-sub);
+}
+.btn-ghost:hover { background: var(--bg-hover); color: var(--text); }
+.btn-danger {
+  background: color-mix(in srgb, var(--red) 15%, transparent);
+  border: 1px solid color-mix(in srgb, var(--red) 40%, transparent);
+  color: var(--red);
+}
+.btn-danger:hover { background: color-mix(in srgb, var(--red) 25%, transparent); }
+.btn-success {
+  background: color-mix(in srgb, var(--green) 15%, transparent);
+  border: 1px solid color-mix(in srgb, var(--green) 40%, transparent);
+  color: var(--green);
+}
+.btn-sm { padding: 5px 10px; font-size: 11px; }
+.btn-icon { padding: 6px 8px; font-size: 13px; }
+
+/* Inputs */
+.input, .select, .textarea {
+  width: 100%;
+  padding: 8px 11px;
+  background: var(--bg-input);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  font: 400 12px/1 'DM Sans', sans-serif;
+  transition: border-color var(--transition);
+  outline: none;
+}
+.input:focus, .select:focus, .textarea:focus { border-color: var(--accent); }
+.input::placeholder { color: var(--text-sub); }
+.select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%23666' d='M0 0l5 6 5-6z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px; cursor: pointer; }
+.select option { background: var(--bg-card); color: var(--text); }
+
+label.field-label {
+  display: block;
+  font-size: 10px;
+  color: var(--text-sub);
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+/* Divider */
+.divider { height: 1px; background: var(--border); margin: 10px 0; }
+
+/* ═══════════════════════════════════════════════════════
+   KPI CARDS
+═══════════════════════════════════════════════════════ */
+.kpi-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.kpi-label { font-size: 10px; color: var(--text-sub); margin-bottom: 8px; }
+.kpi-value { font-size: 26px; font-weight: 800; color: var(--text-bright); }
+.kpi-value.sm { font-size: 18px; }
+.kpi-icon {
+  width: 34px; height: 34px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   GAUGE CIRCULAR (CSS puro, sin canvas)
+═══════════════════════════════════════════════════════ */
+.gauge-wrap { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+
+.gauge {
+  --pct: 0;
+  --clr: var(--green);
+  --size: 110px;
+  width: var(--size);
+  height: var(--size);
+  border-radius: 50%;
+  background: conic-gradient(
+    var(--clr) calc(var(--pct) * 1%),
+    var(--border2) 0
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.gauge::before {
+  content: '';
+  position: absolute;
+  inset: 10px;
+  background: var(--bg-card);
+  border-radius: 50%;
+}
+.gauge-inner {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  pointer-events: none;
+}
+.gauge-pct { font-size: 14px; font-weight: 800; line-height: 1; }
+.gauge-name { font-size: 9px; font-weight: 600; color: var(--text); margin-top: 2px; max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gauge-grams { font-size: 8px; color: var(--text-sub); }
+
+/* ═══════════════════════════════════════════════════════
+   DASHBOARD
+═══════════════════════════════════════════════════════ */
+#tab-dashboard .gauge-row { display: flex; flex-wrap: wrap; gap: 16px; padding: 4px 0 6px; }
+#tab-dashboard .low-stock-alert {
+  background: color-mix(in srgb, var(--yellow) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--yellow) 30%, transparent);
+  border-radius: var(--radius);
+  padding: 10px 16px;
+  font-size: 12px;
+  color: var(--yellow);
+  margin-bottom: 14px;
+}
+.fin-card {
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  border: 1px solid var(--border);
+}
+
+/* ═══════════════════════════════════════════════════════
+   COTIZADOR
+═══════════════════════════════════════════════════════ */
+.quote-item-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin-bottom: 10px;
+  transition: border-color var(--transition);
+}
+.quote-item-card:hover { border-color: var(--border2); }
+
+.item-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px 10px;
+}
+.item-num {
+  background: var(--accent-dim);
+  color: var(--accent);
+  border-radius: 5px;
+  padding: 2px 8px;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+.item-name-input {
+  background: transparent;
+  border: none;
+  color: var(--text-bright);
+  font: 700 15px 'DM Sans', sans-serif;
+  outline: none;
+  flex: 1;
+  min-width: 0;
+}
+.item-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 0 16px 12px;
+  align-items: flex-end;
+}
+.item-field { min-width: 0; }
+.item-field.w-lg { flex: 2; min-width: 160px; }
+.item-field.w-md { flex: 1.5; min-width: 140px; }
+.item-field.w-sm { width: 80px; flex-shrink: 0; }
+.item-field.w-xs { width: 62px; flex-shrink: 0; }
+
+.cost-breakdown {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  padding: 0 16px 16px;
+}
+.cost-cell {
+  background: var(--bg-card2);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 8px 10px;
+}
+.cost-cell.highlight {
+  background: var(--accent-dim);
+  border-color: var(--accent-b);
+}
+.cost-cell .cost-lbl { font-size: 9px; color: var(--text-sub); margin-bottom: 3px; }
+.cost-cell .cost-val { font-size: 13px; font-weight: 700; color: var(--text); }
+.cost-cell.highlight .cost-val { color: var(--accent); }
+
+.total-bar {
+  background: var(--bg-card);
+  border: 1px solid var(--accent-b);
+  border-radius: var(--radius);
+  padding: 16px 22px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+}
+.total-bar .total-lbl { font-size: 11px; color: var(--text-sub); }
+.total-bar .total-sub { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
+.total-bar .total-val { font-size: 32px; font-weight: 800; color: var(--accent); }
+
+.add-item-btn {
+  width: 100%;
+  padding: 14px;
+  background: transparent;
+  border: 2px dashed var(--border);
+  border-radius: var(--radius);
+  color: var(--text-sub);
+  font: 600 13px 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: all var(--transition);
+  margin-bottom: 10px;
+}
+.add-item-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ═══════════════════════════════════════════════════════
+   IMPRESORAS / MATERIALES
+═══════════════════════════════════════════════════════ */
+.printer-card, .material-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  transition: border-color var(--transition);
+}
+.printer-card:hover, .material-card:hover { border-color: var(--border2); }
+
+.card-top { padding: 14px 16px 10px; }
+.card-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 6px; }
+.card-title { font-size: 15px; font-weight: 700; color: var(--text-bright); }
+.card-sub { font-size: 11px; color: var(--text-sub); margin-top: 2px; }
+
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+  padding: 0 16px 14px;
+}
+.info-cell {
+  background: var(--bg-card2);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  padding: 7px 10px;
+}
+.info-cell .ic-lbl { font-size: 9px; color: var(--text-sub); margin-bottom: 2px; }
+.info-cell .ic-val { font-size: 12px; font-weight: 600; }
+
+.discount-row {
+  background: var(--bg-card2);
+  border-top: 1px solid var(--border);
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   VENTAS
+═══════════════════════════════════════════════════════ */
+.filter-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 14px; }
+.filter-btn {
+  padding: 6px 14px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-sub);
+  font: 500 11px 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.filter-btn.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+.filter-btn:hover:not(.active) { background: var(--bg-hover); }
+
+.order-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  margin-bottom: 8px;
+  overflow: hidden;
+  transition: border-color var(--transition);
+}
+.order-card.expanded { border-color: var(--accent-b); }
+
+.order-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  cursor: pointer;
+  user-select: none;
+}
+.order-header:hover { background: var(--bg-hover); }
+
+.order-detail { padding: 0 16px 14px; }
+.order-items-table { width: 100%; border-collapse: collapse; margin: 8px 0; }
+.order-items-table td { padding: 6px 0; font-size: 12px; border-bottom: 1px solid var(--border); }
+.order-items-table td:last-child { text-align: right; font-weight: 700; color: var(--accent); }
+
+.note-row {
+  display: flex;
+  gap: 8px;
+  background: var(--bg-card2);
+  border-top: 1px solid var(--border);
+  padding: 8px 12px;
+}
+
+/* ═══════════════════════════════════════════════════════
+   CONFIGURACIÓN
+═══════════════════════════════════════════════════════ */
+.slider-group { margin-bottom: 6px; }
+.slider-val { font-size: 26px; font-weight: 800; color: var(--accent); text-align: center; }
+.slider-desc { font-size: 10px; color: var(--text-sub); text-align: center; }
+
+input[type="range"] {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 4px;
+  background: var(--border2);
+  border-radius: 2px;
+  outline: none;
+  margin: 8px 0;
+}
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+input[type="range"].green::-webkit-slider-thumb { background: var(--green); box-shadow: 0 0 0 3px color-mix(in srgb, var(--green) 20%, transparent); }
+
+.currency-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+.currency-btn {
+  padding: 8px 20px;
+  background: var(--bg-card2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-sub);
+  font: 700 13px 'DM Sans', sans-serif;
+  cursor: pointer;
+  transition: all var(--transition);
+}
+.currency-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.currency-btn:hover:not(.active) { border-color: var(--border2); }
+
+.formula-row { display: flex; gap: 14px; align-items: baseline; padding: 4px 0; }
+.formula-lbl { font: 700 12px 'JetBrains Mono', monospace; min-width: 220px; }
+.formula-expr { font: 400 12px 'JetBrains Mono', monospace; color: var(--text-sub); }
+
+/* ═══════════════════════════════════════════════════════
+   MODAL / DIALOG
+═══════════════════════════════════════════════════════ */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: #00000088;
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(2px);
+}
+.modal-overlay.open { display: flex; animation: fadeIn 0.15s ease; }
+
+.modal {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  width: 90%;
+  max-width: 580px;
+  max-height: 88vh;
+  overflow-y: auto;
+  box-shadow: 0 24px 60px #00000080;
+}
+.modal-header {
+  padding: 20px 24px 14px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: sticky;
+  top: 0;
+  background: var(--bg-card);
+  z-index: 1;
+}
+.modal-title { font-size: 16px; font-weight: 700; color: var(--text-bright); }
+.modal-body { padding: 20px 24px; }
+.modal-footer { padding: 14px 24px 20px; display: flex; gap: 10px; }
+
+.field-group { margin-bottom: 14px; }
+.field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+.field-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+
+/* ═══════════════════════════════════════════════════════
+   TOAST
+═══════════════════════════════════════════════════════ */
+#toast-container {
+  position: fixed;
+  bottom: 22px;
+  right: 22px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+}
+.toast {
+  padding: 10px 16px;
+  border-radius: 9px;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 4px 20px #00000060;
+  animation: toastIn 0.2s ease, toastOut 0.3s 2.8s ease forwards;
+  pointer-events: auto;
+}
+.toast.ok { background: #142a1f; border: 1px solid #4ade8050; color: var(--green); }
+.toast.err { background: #2a1414; border: 1px solid #f8717150; color: var(--red); }
+@keyframes toastIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes toastOut { to { opacity: 0; transform: translateY(8px); } }
+
+/* ═══════════════════════════════════════════════════════
+   LOADING SPINNER
+═══════════════════════════════════════════════════════ */
+#loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  gap: 10px;
+  font-size: 13px;
+  color: var(--text-sub);
+}
+.spinner {
+  width: 18px; height: 18px;
+  border: 2px solid var(--border2);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ═══════════════════════════════════════════════════════
+   MISC
+═══════════════════════════════════════════════════════ */
+.text-accent { color: var(--accent); }
+.text-green  { color: var(--green); }
+.text-yellow { color: var(--yellow); }
+.text-blue   { color: var(--blue); }
+.text-red    { color: var(--red); }
+.text-sub    { color: var(--text-sub); }
+.font-mono   { font-family: 'JetBrains Mono', monospace; }
+.fw-bold     { font-weight: 700; }
+.fw-800     { font-weight: 800; }
+.empty-state { text-align: center; padding: 40px 0; color: var(--text-sub); font-size: 13px; }
+
+/* Color dot */
+.dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; display: inline-block; }
+
+/* Progress bar */
+.progress-track { height: 8px; background: var(--bg-hover); border-radius: 4px; overflow: hidden; }
+.progress-fill { height: 100%; border-radius: 4px; transition: width 0.4s ease; }
+</style>
+</head>
+<body>
+
+<div id="loading"><div class="spinner"></div> Iniciando Print3D Pro…</div>
+
+<div id="app" style="display:none">
+
+  <!-- ── SIDEBAR ── -->
+  <div id="sidebar">
+    <div class="sidebar-logo">
+      <div class="brand">⬡ Print3D Pro</div>
+      <div class="biz-name" id="biz-name-lbl">Mi Taller 3D</div>
+    </div>
+    <nav>
+      <button class="nav-btn active" data-tab="dashboard">
+        <span class="nav-icon">📊</span> Dashboard
+      </button>
+      <button class="nav-btn" data-tab="cotizador">
+        <span class="nav-icon">💰</span> Cotizador
+      </button>
+      <button class="nav-btn" data-tab="impresoras">
+        <span class="nav-icon">🖨️</span> Impresoras
+      </button>
+      <button class="nav-btn" data-tab="materiales">
+        <span class="nav-icon">🧵</span> Materiales
+      </button>
+      <button class="nav-btn" data-tab="ventas">
+        <span class="nav-icon">📦</span> Ventas
+      </button>
+      <button class="nav-btn" data-tab="config">
+        <span class="nav-icon">⚙️</span> Configuración
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <label class="theme-toggle">
+        <span class="icon" id="theme-icon">🌙</span>
+        <span class="lbl" id="theme-lbl">Tema oscuro</span>
+        <label class="switch">
+          <input type="checkbox" id="theme-check" onchange="toggleTheme()">
+          <div class="switch-track"></div>
+        </label>
+      </label>
+      <div class="sidebar-version">v2.0 · Print3D Pro</div>
+    </div>
+  </div>
+
+  <!-- ── CONTENT ── -->
+  <div id="content">
+
+    <!-- ════════════════ DASHBOARD ════════════════ -->
+    <div id="tab-dashboard" class="tab-view active">
+      <div class="page-header">
+        <h1>Dashboard</h1>
+        <p>Resumen de tu operación de impresión 3D</p>
+      </div>
+      <div id="dashboard-content"></div>
+    </div>
+
+    <!-- ════════════════ COTIZADOR ════════════════ -->
+    <div id="tab-cotizador" class="tab-view">
+      <div class="row-between" style="margin-bottom:24px">
+        <div class="page-header" style="margin-bottom:0">
+          <h1>Cotizador</h1>
+          <p>Presupuesto preciso con todos los costos</p>
+        </div>
+        <div class="row">
+          <button class="btn btn-ghost" onclick="clearQuote()">🗑️ Limpiar</button>
+          <button class="btn btn-primary" onclick="saveQuote()">💾 Guardar Orden</button>
+        </div>
+      </div>
+
+      <!-- Cliente -->
+      <div class="card" style="margin-bottom:14px">
+        <div class="section-lbl">👤 Datos del cliente</div>
+        <div class="grid-4" style="gap:10px">
+          <div><label class="field-label">Nombre / Empresa</label>
+            <input class="input" id="q-name" placeholder="Nombre…"></div>
+          <div><label class="field-label">Correo</label>
+            <input class="input" id="q-email" placeholder="email@…"></div>
+          <div><label class="field-label">Teléfono</label>
+            <input class="input" id="q-phone" placeholder="000 000 0000"></div>
+          <div><label class="field-label">Observaciones</label>
+            <input class="input" id="q-notes" placeholder="Notas…"></div>
+        </div>
+      </div>
+
+      <!-- Items container -->
+      <div id="quote-items"></div>
+
+      <!-- Add item -->
+      <button class="add-item-btn" onclick="addQuoteItem()">＋  Agregar Pieza</button>
+
+      <!-- Total -->
+      <div class="total-bar">
+        <div>
+          <div class="total-lbl">TOTAL DE COTIZACIÓN</div>
+          <div class="total-sub" id="quote-params-lbl"></div>
+        </div>
+        <div class="total-val font-mono" id="quote-total">$0.00 MXN</div>
+      </div>
+    </div>
+
+    <!-- ════════════════ IMPRESORAS ════════════════ -->
+    <div id="tab-impresoras" class="tab-view">
+      <div class="row-between" style="margin-bottom:24px">
+        <div class="page-header" style="margin-bottom:0">
+          <h1>Impresoras</h1>
+          <p id="printers-subtitle">0 perfiles</p>
+        </div>
+        <button class="btn btn-primary" onclick="openPrinterModal()">＋ Nueva Impresora</button>
+      </div>
+      <div class="grid-2" id="printers-grid"></div>
+    </div>
+
+    <!-- ════════════════ MATERIALES ════════════════ -->
+    <div id="tab-materiales" class="tab-view">
+      <div class="row-between" style="margin-bottom:24px">
+        <div class="page-header" style="margin-bottom:0">
+          <h1>Materiales & Filamentos</h1>
+          <p id="materials-subtitle">0 filamentos</p>
+        </div>
+        <button class="btn btn-primary" onclick="openMaterialModal()">＋ Nuevo Material</button>
+      </div>
+      <div class="grid-2" id="materials-grid"></div>
+    </div>
+
+    <!-- ════════════════ VENTAS ════════════════ -->
+    <div id="tab-ventas" class="tab-view">
+      <div class="page-header"><h1>Ventas & Órdenes</h1><p>Gestión de pedidos y seguimiento</p></div>
+      <div id="ventas-content"></div>
+    </div>
+
+    <!-- ════════════════ CONFIG ════════════════ -->
+    <div id="tab-config" class="tab-view">
+      <div class="page-header"><h1>Configuración</h1><p>Parámetros que afectan todas las cotizaciones</p></div>
+      <div id="config-content"></div>
+    </div>
+
+  </div><!-- #content -->
+</div><!-- #app -->
+
+<!-- ── MODALS ── -->
+<div class="modal-overlay" id="modal-printer"><div class="modal" id="modal-printer-inner"></div></div>
+<div class="modal-overlay" id="modal-material"><div class="modal" id="modal-material-inner"></div></div>
+<div class="modal-overlay" id="modal-confirm">
+  <div class="modal" style="max-width:380px">
+    <div class="modal-body" style="padding:28px 24px 14px">
+      <p id="confirm-msg" style="font-size:14px;color:var(--text)"></p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-danger" id="confirm-ok">Confirmar</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-confirm')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── TOAST CONTAINER ── -->
+<div id="toast-container"></div>
+
+<script>
+// ══════════════════════════════════════════════════════════════════
+//  ESTADO GLOBAL
+// ══════════════════════════════════════════════════════════════════
+const S = {
+  config: {},
+  printers: [],
+  materials: [],
+  orders: [],
+  catalogs: {},
+  quoteItems: [],
+  ventasFilter: 'all',
+  expandedOrders: new Set(),
+  currentTab: 'dashboard',
+};
+
+// ══════════════════════════════════════════════════════════════════
+//  API — wrapper con promesas
+// ══════════════════════════════════════════════════════════════════
+const api = {
+  call: (method, ...args) => window.pywebview.api[method](...args),
+};
+
+// ══════════════════════════════════════════════════════════════════
+//  INIT
+// ══════════════════════════════════════════════════════════════════
+window.addEventListener('pywebviewready', async () => {
+  await loadAll();
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  applyTheme(S.config.tema || 'dark');
+  renderTab('dashboard');
+});
+
+async function loadAll() {
+  const [cfg, printers, materials, orders, catalogs] = await Promise.all([
+    api.call('get_config'),
+    api.call('get_printers'),
+    api.call('get_materials'),
+    api.call('get_orders'),
+    api.call('get_catalogs'),
+  ]);
+  S.config    = cfg;
+  S.printers  = printers;
+  S.materials = materials;
+  S.orders    = orders;
+  S.catalogs  = catalogs;
+  document.getElementById('biz-name-lbl').textContent = cfg.negocio || 'Mi Taller 3D';
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  NAVEGACIÓN
+// ══════════════════════════════════════════════════════════════════
+document.querySelectorAll('.nav-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const tab = btn.dataset.tab;
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.querySelectorAll('.tab-view').forEach(v => v.classList.remove('active'));
+    document.getElementById('tab-' + tab).classList.add('active');
+    S.currentTab = tab;
+    renderTab(tab);
+  });
+});
+
+function renderTab(tab) {
+  const renders = {
+    dashboard:  renderDashboard,
+    cotizador:  renderCotizador,
+    impresoras: renderImpresoras,
+    materiales: renderMateriales,
+    ventas:     renderVentas,
+    config:     renderConfig,
+  };
+  if (renders[tab]) renders[tab]();
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  UTILIDADES
+// ══════════════════════════════════════════════════════════════════
+function fmt(v, cur) {
+  cur = cur || S.config.moneda || 'MXN';
+  return new Intl.NumberFormat('es-MX', {
+    style: 'currency', currency: cur, minimumFractionDigits: 2
+  }).format(v || 0);
+}
+
+function uuid() {
+  return crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36);
+}
+
+function toast(msg, ok = true) {
+  const t = document.createElement('div');
+  t.className = 'toast ' + (ok ? 'ok' : 'err');
+  t.innerHTML = (ok ? '✓' : '✗') + '  ' + msg;
+  document.getElementById('toast-container').appendChild(t);
+  setTimeout(() => t.remove(), 3200);
+}
+
+function confirm(msg, cb) {
+  document.getElementById('confirm-msg').textContent = msg;
+  document.getElementById('confirm-ok').onclick = () => { closeModal('modal-confirm'); cb(); };
+  openModal('modal-confirm');
+}
+
+function openModal(id)  { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+
+// Close modal on overlay click
+document.querySelectorAll('.modal-overlay').forEach(el => {
+  el.addEventListener('click', e => { if (e.target === el) closeModal(el.id); });
+});
+
+function badge(text, color) {
+  return `<span class="badge" style="background:${color}22;color:${color}">${text}</span>`;
+}
+
+function brandColor(brand) {
+  const map = {
+    'Bambu Lab':'#4ade80','Creality':'#60a5fa','Elegoo':'#00d4aa',
+    'Anycubic':'#fbbf24','Prusa':'#f97316','Flashforge':'#a78bfa',
+    'Sunlu':'#60a5fa','Polymaker':'#f97316','eSUN':'#fbbf24',
+    'Hatchbox':'#4ade80','Prusament':'#f97316','Overture':'#34d399',
+    'Genérico':'#9ca3af','Personalizada':'#9ca3af',
+  };
+  return map[brand] || '#9ca3af';
+}
+
+function statusInfo(s) {
+  const map = {
+    'pending':     {label:'Pendiente',  color:'#fbbf24'},
+    'in-progress': {label:'En proceso', color:'#60a5fa'},
+    'completed':   {label:'Completada', color:'#4ade80'},
+    'cancelled':   {label:'Cancelada',  color:'#f87171'},
+    'delivered':   {label:'Entregada',  color:'#a78bfa'},
+  };
+  return map[s] || {label: s, color: '#9ca3af'};
+}
+
+function gaugeHTML(pct, name, rem, total, color) {
+  const cssVarPct = Math.round(pct * 100);
+  return `
+    <div class="gauge-wrap">
+      <div class="gauge" style="--pct:${cssVarPct};--clr:${color}">
+        <div class="gauge-inner">
+          <div class="gauge-pct" style="color:${color}">${cssVarPct}%</div>
+          <div class="gauge-name">${name}</div>
+          <div class="gauge-grams">${rem.toFixed(0)}/${total}g</div>
+        </div>
+      </div>
+    </div>`;
+}
+
+function gaugeColor(pct) {
+  if (pct < 0.20) return 'var(--red)';
+  if (pct < 0.40) return 'var(--yellow)';
+  return 'var(--green)';
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  TEMA
+// ══════════════════════════════════════════════════════════════════
+function applyTheme(mode) {
+  document.documentElement.setAttribute('data-theme', mode);
+  const isDark = mode === 'dark';
+  document.getElementById('theme-icon').textContent = isDark ? '🌙' : '☀️';
+  document.getElementById('theme-lbl').textContent  = isDark ? 'Tema oscuro' : 'Tema claro';
+  document.getElementById('theme-check').checked    = isDark;
+}
+
+async function toggleTheme() {
+  const newMode = S.config.tema === 'dark' ? 'light' : 'dark';
+  S.config.tema = newMode;
+  applyTheme(newMode);
+  await api.call('save_config', S.config);
+  toast('Tema cambiado a ' + (newMode === 'dark' ? 'oscuro' : 'claro'));
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  DASHBOARD
+// ══════════════════════════════════════════════════════════════════
+async function renderDashboard() {
+  const stats = await api.call('get_stats');
+  const lowStock = S.materials.filter(m => {
+    const r = (m.spoolWeight - m.usedGrams) / Math.max(m.spoolWeight, 1);
+    return r < 0.2;
+  });
+
+  const revenue  = stats.revenue;
+  const expected = stats.expected;
+
+  let html = `
+    <!-- KPIs -->
+    <div class="grid-4" style="margin-bottom:16px">
+      ${kpiCard('Impresoras Activas', stats.activePrinters, '🖨️', 'var(--accent)')}
+      ${kpiCard('Órdenes Pendientes', stats.pending, '⏳', 'var(--yellow)')}
+      ${kpiCard('En Proceso', stats.inProgress, '⚡', 'var(--blue)')}
+      ${kpiCard('Ingresos Totales', fmt(revenue), '💰', 'var(--green)', true)}
+    </div>`;
+
+  if (lowStock.length) {
+    html += `<div class="low-stock-alert">⚠️ Stock bajo: ${lowStock.map(m => m.name).join(', ')} — Reponer pronto</div>`;
+  }
+
+  // Filamentos
+  html += `<div class="card" style="margin-bottom:16px">
+    <div class="section-lbl">🧵 Filamento Disponible</div>
+    <div class="gauge-row">`;
+  if (!S.materials.length) {
+    html += `<div class="empty-state">Sin materiales. Agrega en la pestaña Materiales →</div>`;
+  } else {
+    S.materials.forEach(m => {
+      const rem = Math.max(0, m.spoolWeight - m.usedGrams);
+      const pct = rem / Math.max(m.spoolWeight, 1);
+      html += gaugeHTML(pct, m.name, rem, m.spoolWeight, gaugeColor(pct));
+    });
+  }
+  html += `</div></div>`;
+
+  // 2 cols
+  html += `<div class="grid-2" style="margin-bottom:16px">`;
+
+  // Últimas órdenes
+  html += `<div class="card"><div class="section-lbl">📋 Últimas Órdenes</div>`;
+  if (!S.orders.length) {
+    html += `<div class="empty-state">Sin órdenes aún →</div>`;
+  } else {
+    [...S.orders].reverse().slice(0, 6).forEach(o => {
+      const st = statusInfo(o.status);
+      html += `<div class="row-between" style="padding:8px 0;border-bottom:1px solid var(--border)">
+        <div>
+          <div style="font-weight:600;font-size:13px">${o.clientName || 'Sin nombre'}</div>
+          <div style="font-size:10px;color:var(--text-sub)">${(o.items||[]).length} pzas · ${(o.createdAt||'').slice(0,10)}</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-weight:700;color:var(--accent);font-size:13px">${fmt(o.total)}</div>
+          <div style="font-size:10px;color:${st.color}">${st.label}</div>
+        </div>
+      </div>`;
+    });
+  }
+  html += `</div>`;
+
+  // Flota
+  html += `<div class="card"><div class="section-lbl">🖨️ Flota de Impresoras</div>`;
+  if (!S.printers.length) {
+    html += `<div class="empty-state">Sin impresoras →</div>`;
+  } else {
+    S.printers.forEach(p => {
+      const bc = brandColor(p.brand);
+      const bv = p.buildVolume || {};
+      html += `<div style="background:var(--bg-card2);border:1px solid var(--border);border-radius:9px;padding:10px 12px;margin-bottom:8px;opacity:${p.active?1:0.5}">
+        <div class="card-tags" style="margin-bottom:4px">
+          ${badge(p.brand||'Custom', bc)}
+          ${p.multicolor ? badge('🎨 '+p.colors+' col.','var(--accent)') : ''}
+        </div>
+        <div style="font-weight:700;font-size:13px">${p.name}</div>
+        <div style="font-size:10px;color:var(--text-sub)">${bv.x||0}×${bv.y||0}×${bv.z||0}mm</div>
+      </div>`;
+    });
+  }
+  html += `</div></div>`;
+
+  // Financiero
+  html += `<div class="grid-3">
+    ${finCard('✅ Confirmado', revenue, 'var(--green)')}
+    ${finCard('⏳ Por cobrar', expected, 'var(--yellow)')}
+    ${finCard('📦 Total sistema', revenue + expected, 'var(--accent)')}
+  </div>`;
+
+  document.getElementById('dashboard-content').innerHTML = html;
+}
+
+function kpiCard(title, val, icon, color, small = false) {
+  return `<div class="kpi-card">
+    <div>
+      <div class="kpi-label">${title}</div>
+      <div class="kpi-value${small?' sm':''}">${val}</div>
+    </div>
+    <div class="kpi-icon" style="background:${color}18">${icon}</div>
+  </div>`;
+}
+
+function finCard(label, val, color) {
+  return `<div class="fin-card" style="background:${color}10;border-color:${color}25">
+    <div style="font-size:10px;color:var(--text-sub);margin-bottom:4px">${label}</div>
+    <div style="font-size:20px;font-weight:800;color:${color}">${fmt(val)}</div>
+  </div>`;
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  COTIZADOR
+// ══════════════════════════════════════════════════════════════════
+function renderCotizador() {
+  const cfg = S.config;
+  document.getElementById('quote-params-lbl').textContent =
+    `Merma ${(cfg.merma*100).toFixed(0)}%  ·  Margen ${(cfg.margen*100).toFixed(0)}%`;
+  renderQuoteItems();
+}
+
+function renderQuoteItems() {
+  const container = document.getElementById('quote-items');
+  container.innerHTML = '';
+  S.quoteItems.forEach((item, idx) => {
+    container.appendChild(buildItemCard(item, idx));
+  });
+  recalcQuote();
+}
+
+function buildItemCard(item, idx) {
+  const div = document.createElement('div');
+  div.className = 'quote-item-card';
+  div.id = 'item-card-' + item.id;
+
+  const activePrinters = S.printers.filter(p => p.active !== false);
+  const matOpts = S.materials.map(m =>
+    `<option value="${m.id}" ${m.id===item.materialId?'selected':''}>${m.name} — $${m.costPerGram}/g</option>`
+  ).join('');
+  const prOpts = activePrinters.map(p =>
+    `<option value="${p.id}" ${p.id===item.printerId?'selected':''}>${p.name}</option>`
+  ).join('');
+
+  div.innerHTML = `
+    <div class="item-header">
+      <span class="item-num">#${idx+1}</span>
+      <input class="item-name-input" value="${item.name}" onchange="updateItem('${item.id}','name',this.value)">
+      <button class="btn btn-danger btn-icon btn-sm" onclick="removeQuoteItem('${item.id}')">✕</button>
+    </div>
+    <div class="item-fields">
+      <div class="item-field w-lg">
+        <label class="field-label">Material</label>
+        <select class="select" onchange="updateItem('${item.id}','materialId',this.value)">
+          ${matOpts || '<option>Sin materiales</option>'}
+        </select>
+      </div>
+      <div class="item-field w-md">
+        <label class="field-label">Impresora</label>
+        <select class="select" onchange="updateItem('${item.id}','printerId',this.value)">
+          ${prOpts || '<option>Sin impresoras</option>'}
+        </select>
+      </div>
+      <div class="item-field w-sm">
+        <label class="field-label">Peso (g)</label>
+        <input type="number" class="input" value="${item.weight}" oninput="updateItem('${item.id}','weight',+this.value)">
+      </div>
+      <div class="item-field w-sm">
+        <label class="field-label">Tiempo (h)</label>
+        <input type="number" step="0.5" class="input" value="${item.time}" oninput="updateItem('${item.id}','time',+this.value)">
+      </div>
+      <div class="item-field w-xs">
+        <label class="field-label">Cant.</label>
+        <input type="number" min="1" class="input" value="${item.qty}" oninput="updateItem('${item.id}','qty',+this.value)">
+      </div>
+    </div>
+    <div id="breakdown-${item.id}" class="cost-breakdown"></div>`;
+
+  return div;
+}
+
+function updateItem(id, key, val) {
+  const item = S.quoteItems.find(i => i.id === id);
+  if (!item) return;
+  item[key] = val;
+  // Auto-fill printerId/materialId defaults
+  if (key === 'materialId' && !item.materialId && S.materials.length)
+    item.materialId = S.materials[0].id;
+  if (key === 'printerId' && !item.printerId) {
+    const first = S.printers.find(p => p.active !== false);
+    if (first) item.printerId = first.id;
+  }
+  recalcQuote();
+}
+
+let recalcTimer = null;
+function recalcQuote() {
+  clearTimeout(recalcTimer);
+  recalcTimer = setTimeout(async () => {
+    if (!S.quoteItems.length) {
+      document.getElementById('quote-total').textContent = fmt(0);
+      return;
+    }
+    const result = await api.call('calc_quote', S.quoteItems);
+    document.getElementById('quote-total').textContent = fmt(result.total);
+    result.items.forEach((c, idx) => {
+      const item = S.quoteItems[idx];
+      const el = document.getElementById('breakdown-' + item.id);
+      if (!el || !c.precioFinal) return;
+      el.innerHTML = [
+        ['Costo Mat.', c.costMaterial, false],
+        ['Costo Máq.', c.costMachine,  false],
+        ['Electricidad', c.costElec,   false],
+        ['Sub.+Merma', c.subtotalMerma, false],
+        [`Precio ×${item.qty}`, c.lineTotal, true],
+      ].map(([l, v, hi]) => `
+        <div class="cost-cell${hi?' highlight':''}">
+          <div class="cost-lbl">${l}</div>
+          <div class="cost-val">${fmt(v)}</div>
+        </div>`).join('');
+    });
+  }, 220);  // debounce 220ms — no recalcula en cada tecla
+}
+
+function addQuoteItem() {
+  const first_mat = S.materials[0];
+  const first_pr  = S.printers.find(p => p.active !== false) || S.printers[0];
+  S.quoteItems.push({
+    id: uuid(), name: `Pieza ${S.quoteItems.length + 1}`,
+    materialId: first_mat?.id || '', printerId: first_pr?.id || '',
+    weight: 100, time: 6, qty: 1, multicolorLayers: [],
+  });
+  renderQuoteItems();
+}
+
+function removeQuoteItem(id) {
+  S.quoteItems = S.quoteItems.filter(i => i.id !== id);
+  renderQuoteItems();
+}
+
+async function saveQuote() {
+  if (!S.quoteItems.length) { toast('Agrega al menos una pieza', false); return; }
+  const order = {
+    clientName:  document.getElementById('q-name').value,
+    clientEmail: document.getElementById('q-email').value,
+    clientPhone: document.getElementById('q-phone').value,
+    notes:       document.getElementById('q-notes').value,
+    items: S.quoteItems,
+  };
+  const res = await api.call('save_order', order);
+  S.orders.push(res.order);
+  toast('✅ Cotización guardada como orden');
+  clearQuote();
+}
+
+function clearQuote() {
+  S.quoteItems = [];
+  ['q-name','q-email','q-phone','q-notes'].forEach(id => document.getElementById(id).value = '');
+  renderQuoteItems();
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  IMPRESORAS
+// ══════════════════════════════════════════════════════════════════
+function renderImpresoras() {
+  const grid = document.getElementById('printers-grid');
+  document.getElementById('printers-subtitle').textContent =
+    `${S.printers.length} perfiles · ${S.printers.filter(p=>p.active!==false).length} activas`;
+
+  if (!S.printers.length) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">Sin impresoras. Agrega la primera →</div>`;
+    return;
+  }
+
+  grid.innerHTML = S.printers.map(p => {
+    const bc = brandColor(p.brand);
+    const bv = p.buildVolume || {};
+    const active = p.active !== false;
+    return `
+    <div class="printer-card" style="opacity:${active?1:0.55}">
+      <div class="card-top">
+        <div class="row-between">
+          <div>
+            <div class="card-tags">
+              ${badge(p.brand||'Custom', bc)}
+              ${p.multicolor ? badge('🎨 '+p.amsType+' '+p.colors+' col.','var(--accent)') : ''}
+              ${badge(p.type||'CoreXY','var(--text-sub)')}
+            </div>
+            <div class="card-title">${p.name}</div>
+          </div>
+          <div class="row">
+            <button class="btn btn-sm ${active?'btn-success':'btn-danger'}"
+              onclick="togglePrinter('${p.id}')">${active?'● Activa':'○ Inact.'}</button>
+            <button class="btn btn-ghost btn-icon btn-sm" onclick="editPrinter('${p.id}')">✏️</button>
+            <button class="btn btn-danger btn-icon btn-sm" onclick="deletePrinter('${p.id}')">🗑️</button>
+          </div>
+        </div>
+      </div>
+      <div class="info-grid">
+        ${infoCell('Volumen', `${bv.x||0}×${bv.y||0}×${bv.z||0}mm`)}
+        ${infoCell('Vel. máx.', `${p.maxSpeed||0} mm/s`)}
+        ${infoCell('Costo/hora', `$${p.costPerHour||0}`)}
+        ${infoCell('Consumo', `${p.avgPowerW||0}W`)}
+        ${infoCell('Temp. ext.', `${p.maxTemp||0}°C`)}
+        ${infoCell('Temp. cama', `${p.bedTemp||0}°C`)}
+      </div>
+      ${p.notes ? `<div style="padding:0 16px 12px;font-size:11px;color:var(--text-dim);font-style:italic">${p.notes}</div>` : ''}
+    </div>`;
+  }).join('');
+}
+
+function infoCell(lbl, val) {
+  return `<div class="info-cell"><div class="ic-lbl">${lbl}</div><div class="ic-val">${val}</div></div>`;
+}
+
+async function togglePrinter(id) {
+  await api.call('toggle_printer', id);
+  S.printers = await api.call('get_printers');
+  renderImpresoras();
+}
+
+async function deletePrinter(id) {
+  const p = S.printers.find(x => x.id === id);
+  confirm(`¿Eliminar "${p?.name || 'esta impresora'}"?`, async () => {
+    await api.call('delete_printer', id);
+    S.printers = S.printers.filter(x => x.id !== id);
+    renderImpresoras();
+    toast('Impresora eliminada');
+  });
+}
+
+function openPrinterModal(printer) {
+  const isNew = !printer;
+  const brands = Object.keys(S.catalogs.printerBrands || {});
+  const curBrand = printer?.brand || 'Bambu Lab';
+  const curModels = Object.keys(S.catalogs.printerBrands?.[curBrand]?.models || {});
+  const amsTypes = S.catalogs.amsTypes || [];
+
+  const brandOpts  = brands.map(b => `<option value="${b}" ${b===curBrand?'selected':''}>${b}</option>`).join('');
+  const modelOpts  = curModels.map(m => `<option value="${m}" ${m===printer?.model?'selected':''}>${m}</option>`).join('');
+  const typeOpts   = ['CoreXY','Cartesiana','Delta','SCARA','Polar'].map(t =>
+    `<option value="${t}" ${t===(printer?.type||'CoreXY')?'selected':''}>${t}</option>`).join('');
+  const amsOpts    = amsTypes.map(a =>
+    `<option value="${a}" ${a===(printer?.amsType||'Single')?'selected':''}>${a}</option>`).join('');
+
+  const bv = printer?.buildVolume || {x:256,y:256,z:256};
+  document.getElementById('modal-printer-inner').innerHTML = `
+    <div class="modal-header">
+      <span class="modal-title">${isNew?'Nueva Impresora':'Editar — '+printer.name}</span>
+      <button class="btn btn-ghost btn-icon btn-sm" onclick="closeModal('modal-printer')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field-row">
+        <div>
+          <label class="field-label">Marca</label>
+          <select class="select" id="pm-brand" onchange="onPrinterBrandChange()">
+            ${brandOpts}
+          </select>
+        </div>
+        <div>
+          <label class="field-label">Modelo (preset)</label>
+          <select class="select" id="pm-model" onchange="onPrinterModelChange()">
+            ${modelOpts}
+          </select>
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Nombre para mostrar</label>
+        <input class="input" id="pm-name" value="${printer?.name||''}" placeholder="Ej: Mi X1C">
+      </div>
+      <div class="field-row">
+        <div><label class="field-label">Costo / hora ($)</label>
+          <input type="number" step="0.5" class="input" id="pm-cost" value="${printer?.costPerHour||4}"></div>
+        <div><label class="field-label">Consumo avg (W)</label>
+          <input type="number" class="input" id="pm-watts" value="${printer?.avgPowerW||350}"></div>
+      </div>
+      <div class="field-row-3">
+        <div><label class="field-label">Vol. X (mm)</label>
+          <input type="number" class="input" id="pm-x" value="${bv.x}"></div>
+        <div><label class="field-label">Vol. Y (mm)</label>
+          <input type="number" class="input" id="pm-y" value="${bv.y}"></div>
+        <div><label class="field-label">Vol. Z (mm)</label>
+          <input type="number" class="input" id="pm-z" value="${bv.z}"></div>
+      </div>
+      <div class="field-row">
+        <div><label class="field-label">Cinemática</label>
+          <select class="select" id="pm-type">${typeOpts}</select></div>
+        <div><label class="field-label">Temp. ext. (°C)</label>
+          <input type="number" class="input" id="pm-maxtemp" value="${printer?.maxTemp||300}"></div>
+      </div>
+      <div class="field-row">
+        <div><label class="field-label">Temp. cama (°C)</label>
+          <input type="number" class="input" id="pm-bedtemp" value="${printer?.bedTemp||120}"></div>
+        <div><label class="field-label">Vel. máx. (mm/s)</label>
+          <input type="number" class="input" id="pm-speed" value="${printer?.maxSpeed||500}"></div>
+      </div>
+      <div class="field-row">
+        <div>
+          <label class="field-label">Sistema multicolor</label>
+          <select class="select" id="pm-ams">${amsOpts}</select>
+        </div>
+        <div>
+          <label class="field-label">Slots / Colores</label>
+          <input type="number" min="1" max="16" class="input" id="pm-colors" value="${printer?.colors||1}">
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Notas</label>
+        <input class="input" id="pm-notes" value="${printer?.notes||''}" placeholder="Características especiales…">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="savePrinterModal(${isNew?'null':`'${printer.id}'`})">💾 Guardar</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-printer')">Cancelar</button>
+    </div>`;
+
+  // Guardar id original para edición
+  document.getElementById('modal-printer-inner').dataset.editId = printer?.id || '';
+  openModal('modal-printer');
+}
+
+function onPrinterBrandChange() {
+  const brand  = document.getElementById('pm-brand').value;
+  const models = Object.keys(S.catalogs.printerBrands?.[brand]?.models || {});
+  const sel    = document.getElementById('pm-model');
+  sel.innerHTML = models.map(m => `<option value="${m}">${m}</option>`).join('');
+  if (models.length) onPrinterModelChange();
+}
+
+function onPrinterModelChange() {
+  const brand = document.getElementById('pm-brand').value;
+  const model = document.getElementById('pm-model').value;
+  const specs = S.catalogs.printerBrands?.[brand]?.models?.[model];
+  if (!specs) return;
+  document.getElementById('pm-cost').value    = specs.costPerHour;
+  document.getElementById('pm-watts').value   = specs.avgPowerW;
+  document.getElementById('pm-x').value       = specs.buildVolume.x;
+  document.getElementById('pm-y').value       = specs.buildVolume.y;
+  document.getElementById('pm-z').value       = specs.buildVolume.z;
+  document.getElementById('pm-maxtemp').value = specs.maxTemp;
+  document.getElementById('pm-bedtemp').value = specs.bedTemp;
+  document.getElementById('pm-speed').value   = specs.maxSpeed;
+  document.getElementById('pm-ams').value     = specs.amsType;
+  document.getElementById('pm-colors').value  = specs.colors;
+  document.getElementById('pm-type').value    = specs.type;
+  document.getElementById('pm-notes').value   = specs.notes;
+  if (!document.getElementById('pm-name').value)
+    document.getElementById('pm-name').value = `${brand} ${model}`;
+}
+
+function editPrinter(id) {
+  openPrinterModal(S.printers.find(p => p.id === id));
+}
+
+async function savePrinterModal(existingId) {
+  const data = {
+    id:         existingId || uuid(),
+    name:       document.getElementById('pm-name').value.trim() ||
+                `${document.getElementById('pm-brand').value} ${document.getElementById('pm-model').value}`,
+    brand:      document.getElementById('pm-brand').value,
+    model:      document.getElementById('pm-model').value,
+    type:       document.getElementById('pm-type').value,
+    costPerHour: +document.getElementById('pm-cost').value,
+    avgPowerW:   +document.getElementById('pm-watts').value,
+    buildVolume: {
+      x: +document.getElementById('pm-x').value,
+      y: +document.getElementById('pm-y').value,
+      z: +document.getElementById('pm-z').value,
+    },
+    maxTemp:  +document.getElementById('pm-maxtemp').value,
+    bedTemp:  +document.getElementById('pm-bedtemp').value,
+    maxSpeed: +document.getElementById('pm-speed').value,
+    amsType:  document.getElementById('pm-ams').value,
+    colors:   +document.getElementById('pm-colors').value,
+    multicolor: document.getElementById('pm-ams').value !== 'Single',
+    notes:    document.getElementById('pm-notes').value,
+    active:   true,
+  };
+  if (existingId) {
+    const orig = S.printers.find(p => p.id === existingId);
+    if (orig) data.active = orig.active !== false;
+    await api.call('update_printer', data);
+    S.printers = S.printers.map(p => p.id === existingId ? data : p);
+  } else {
+    await api.call('add_printer', data);
+    S.printers = await api.call('get_printers');
+  }
+  closeModal('modal-printer');
+  renderImpresoras();
+  toast('✅ Impresora guardada');
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  MATERIALES
+// ══════════════════════════════════════════════════════════════════
+function renderMateriales() {
+  const grid = document.getElementById('materials-grid');
+  document.getElementById('materials-subtitle').textContent =
+    `${S.materials.length} filamentos en inventario`;
+
+  if (!S.materials.length) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1">Sin materiales. Agrega el primero →</div>`;
+    return;
+  }
+
+  grid.innerHTML = S.materials.map(m => {
+    const rem = Math.max(0, m.spoolWeight - m.usedGrams);
+    const pct = rem / Math.max(m.spoolWeight, 1);
+    const col = gaugeColor(pct);
+    const bc  = brandColor(m.brand || 'Genérico');
+    return `
+    <div class="material-card">
+      <div class="card-top">
+        <div class="row-between">
+          <div class="row" style="gap:10px">
+            <span class="dot" style="background:${m.color||'#888'}"></span>
+            <div>
+              <div class="card-tags">
+                ${badge(m.brand||'Genérico', bc)}
+                ${badge(m.baseType||m.name, 'var(--text-sub)')}
+                ${m.subtype ? badge(m.subtype, 'var(--blue)') : ''}
+              </div>
+              <div class="card-title">${m.name}</div>
+            </div>
+          </div>
+          <div class="row">
+            <button class="btn btn-success btn-icon btn-sm" title="Reset carrete" onclick="resetSpool('${m.id}')">↺</button>
+            <button class="btn btn-ghost btn-icon btn-sm" onclick="editMaterial('${m.id}')">✏️</button>
+            <button class="btn btn-danger btn-icon btn-sm" onclick="deleteMaterial('${m.id}')">🗑️</button>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;gap:16px;padding:0 16px 12px;align-items:center">
+        ${gaugeHTML(pct, m.name, rem, m.spoolWeight, col)}
+        <div style="flex:1">
+          ${infoCell('Costo/gramo', `$${m.costPerGram}`)}
+          <div style="margin-top:6px"></div>
+          ${infoCell('Temp. imp.',  `${m.printTemp}°C`)}
+          <div style="margin-top:6px"></div>
+          ${pct < 0.2 ? `<div style="color:var(--red);font-size:11px;margin-top:8px">⚠️ Stock bajo — reponer pronto</div>` : ''}
+        </div>
+      </div>
+      <div class="discount-row">
+        <span style="font-size:11px;color:var(--text-sub)">Descontar uso:</span>
+        <input type="number" class="input" id="disc-${m.id}" placeholder="gramos" style="width:90px">
+        <button class="btn btn-primary btn-sm" onclick="discountMaterial('${m.id}')">− Descontar</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function resetSpool(id) {
+  confirm('¿Reiniciar carrete al 100%?', async () => {
+    await api.call('reset_spool', id);
+    S.materials = await api.call('get_materials');
+    renderMateriales();
+    toast('Carrete reiniciado al 100%');
+  });
+}
+
+async function deleteMaterial(id) {
+  const m = S.materials.find(x => x.id === id);
+  confirm(`¿Eliminar "${m?.name}"?`, async () => {
+    await api.call('delete_material', id);
+    S.materials = S.materials.filter(x => x.id !== id);
+    renderMateriales();
+    toast('Material eliminado');
+  });
+}
+
+async function discountMaterial(id) {
+  const val = +document.getElementById('disc-' + id).value;
+  if (!val || val <= 0) return;
+  await api.call('discount_material', id, val);
+  S.materials = await api.call('get_materials');
+  renderMateriales();
+  toast(`${val}g descontados`);
+}
+
+function openMaterialModal(material) {
+  const isNew = !material;
+  const ftypes = Object.keys(S.catalogs.filamentTypes || {});
+  const curType = material?.baseType || 'PLA';
+  const subs = Object.keys(S.catalogs.filamentTypes?.[curType]?.subtypes || {});
+  const brands = Object.keys(S.catalogs.filamentBrands || {});
+
+  const colors = S.catalogs.filamentColors || {};
+  const colorDots = Object.entries(colors).slice(0, 14).map(([name, hex]) =>
+    `<button type="button" class="btn btn-icon" style="background:${hex};width:24px;height:24px;padding:0;border-radius:50%;border:2px solid transparent"
+      onclick="setMatColor('${hex}')" title="${name}"></button>`
+  ).join('');
+
+  document.getElementById('modal-material-inner').innerHTML = `
+    <div class="modal-header">
+      <span class="modal-title">${isNew?'Nuevo Material':'Editar — '+material.name}</span>
+      <button class="btn btn-ghost btn-icon btn-sm" onclick="closeModal('modal-material')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="field-row">
+        <div>
+          <label class="field-label">Marca</label>
+          <select class="select" id="mm-brand">${brands.map(b=>`<option value="${b}" ${b===(material?.brand||'Sunlu')?'selected':''}>${b}</option>`).join('')}</select>
+        </div>
+        <div>
+          <label class="field-label">Tipo base</label>
+          <select class="select" id="mm-base" onchange="onMatTypeChange()">
+            ${ftypes.map(t=>`<option value="${t}" ${t===curType?'selected':''}>${t}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Variante / Subtipo</label>
+        <select class="select" id="mm-sub" onchange="onMatSubChange()">
+          ${subs.map(s=>`<option value="${s}" ${s===(material?.subtype||'Estándar')?'selected':''}>${s}</option>`).join('')}
+        </select>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Nombre para mostrar</label>
+        <input class="input" id="mm-name" value="${material?.name||''}" placeholder="Auto-generado si está vacío">
+      </div>
+      <div class="field-row">
+        <div><label class="field-label">Costo / gramo ($)</label>
+          <input type="number" step="0.01" class="input" id="mm-cost" value="${material?.costPerGram||0.35}"></div>
+        <div><label class="field-label">Peso carrete (g)</label>
+          <input type="number" class="input" id="mm-spool" value="${material?.spoolWeight||1000}"></div>
+      </div>
+      <div class="field-row-3">
+        <div><label class="field-label">Temp. imp. (°C)</label>
+          <input type="number" class="input" id="mm-printtemp" value="${material?.printTemp||200}"></div>
+        <div><label class="field-label">Temp. cama (°C)</label>
+          <input type="number" class="input" id="mm-bedtemp" value="${material?.bedTemp||60}"></div>
+        <div><label class="field-label">Densidad (g/cm³)</label>
+          <input type="number" step="0.01" class="input" id="mm-density" value="${material?.density||1.24}"></div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Color</label>
+        <div class="row" style="gap:6px;flex-wrap:wrap;margin-bottom:8px">${colorDots}</div>
+        <div class="row" style="gap:8px">
+          <input type="color" id="mm-color" value="${material?.color||'#4CAF50'}"
+            style="width:44px;height:34px;border:1px solid var(--border2);border-radius:7px;cursor:pointer;background:transparent;padding:2px">
+          <span id="mm-color-hex" style="font:400 12px 'JetBrains Mono',monospace;color:var(--text-sub)">${material?.color||'#4CAF50'}</span>
+        </div>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Notas</label>
+        <input class="input" id="mm-notes" value="${material?.notes||''}" placeholder="Usos recomendados…">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-primary" onclick="saveMaterialModal(${isNew?'null':`'${material.id}'`})">💾 Guardar</button>
+      <button class="btn btn-ghost" onclick="closeModal('modal-material')">Cancelar</button>
+    </div>`;
+
+  document.getElementById('mm-color').addEventListener('input', e => {
+    document.getElementById('mm-color-hex').textContent = e.target.value;
+  });
+
+  if (isNew) onMatSubChange();
+  openModal('modal-material');
+}
+
+function setMatColor(hex) {
+  document.getElementById('mm-color').value = hex;
+  document.getElementById('mm-color-hex').textContent = hex;
+}
+
+function onMatTypeChange() {
+  const base = document.getElementById('mm-base').value;
+  const subs = Object.keys(S.catalogs.filamentTypes?.[base]?.subtypes || {});
+  const sel  = document.getElementById('mm-sub');
+  sel.innerHTML = subs.map(s => `<option value="${s}">${s}</option>`).join('');
+  onMatSubChange();
+}
+
+function onMatSubChange() {
+  const base  = document.getElementById('mm-base').value;
+  const sub   = document.getElementById('mm-sub').value;
+  const specs = S.catalogs.filamentTypes?.[base]?.subtypes?.[sub];
+  if (!specs) return;
+  document.getElementById('mm-cost').value      = specs.costPerGram;
+  document.getElementById('mm-printtemp').value = specs.printTemp;
+  document.getElementById('mm-bedtemp').value   = specs.bedTemp;
+  document.getElementById('mm-density').value   = specs.density;
+  // Sugerir color base del tipo
+  const baseColor = S.catalogs.filamentTypes?.[base]?.color;
+  if (baseColor) { setMatColor(baseColor); }
+  // Auto-nombre
+  if (!document.getElementById('mm-name').value) {
+    const brand = document.getElementById('mm-brand').value;
+    document.getElementById('mm-name').value = sub === 'Estándar' ? `${brand} ${base}` : `${brand} ${base} ${sub}`;
+  }
+}
+
+function editMaterial(id) {
+  openMaterialModal(S.materials.find(m => m.id === id));
+}
+
+async function saveMaterialModal(existingId) {
+  const brand = document.getElementById('mm-brand').value;
+  const base  = document.getElementById('mm-base').value;
+  const sub   = document.getElementById('mm-sub').value;
+  const data = {
+    id:          existingId || uuid(),
+    name:        document.getElementById('mm-name').value.trim() || `${brand} ${base}`,
+    brand, baseType: base, subtype: sub,
+    color:       document.getElementById('mm-color').value,
+    costPerGram: +document.getElementById('mm-cost').value,
+    spoolWeight: +document.getElementById('mm-spool').value,
+    usedGrams:   existingId ? (S.materials.find(m=>m.id===existingId)?.usedGrams||0) : 0,
+    printTemp:   +document.getElementById('mm-printtemp').value,
+    bedTemp:     +document.getElementById('mm-bedtemp').value,
+    density:     +document.getElementById('mm-density').value,
+    notes:       document.getElementById('mm-notes').value,
+  };
+  if (existingId) {
+    await api.call('update_material', data);
+    S.materials = S.materials.map(m => m.id === existingId ? data : m);
+  } else {
+    await api.call('add_material', data);
+    S.materials = await api.call('get_materials');
+  }
+  closeModal('modal-material');
+  renderMateriales();
+  toast('✅ Material guardado');
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  VENTAS
+// ══════════════════════════════════════════════════════════════════
+function renderVentas() {
+  const statuses = ['all','pending','in-progress','completed','cancelled','delivered'];
+  const stLabels = {all:'Todas',pending:'Pendientes','in-progress':'En proceso',
+    completed:'Completadas',cancelled:'Canceladas',delivered:'Entregadas'};
+
+  const orders  = S.orders;
+  const revenue = orders.filter(o=>o.status==='completed').reduce((s,o)=>s+o.total,0);
+  const expect  = orders.filter(o=>['pending','in-progress'].includes(o.status)).reduce((s,o)=>s+o.total,0);
+
+  let html = `
+    <div class="grid-4" style="margin-bottom:14px">
+      ${kpiCard('Total órdenes', orders.length, '📦','var(--text-sub)')}
+      ${kpiCard('Pendientes', orders.filter(o=>o.status==='pending').length,'⏳','var(--yellow)')}
+      ${kpiCard('En proceso', orders.filter(o=>o.status==='in-progress').length,'⚡','var(--blue)')}
+      ${kpiCard('Completadas', orders.filter(o=>o.status==='completed').length,'✅','var(--green)')}
+    </div>
+    <div class="grid-2" style="margin-bottom:14px">
+      ${finCard('💰 Ingresos confirmados', revenue, 'var(--green)')}
+      ${finCard('⏳ Ingresos por cobrar',  expect,  'var(--yellow)')}
+    </div>
+    <div class="filter-row">
+      ${statuses.map(s=>`<button class="filter-btn${S.ventasFilter===s?' active':''}" onclick="setVentasFilter('${s}')">${stLabels[s]}</button>`).join('')}
+    </div>`;
+
+  const filtered = [...orders].reverse().filter(o =>
+    S.ventasFilter === 'all' || o.status === S.ventasFilter
+  );
+
+  if (!filtered.length) {
+    html += `<div class="empty-state">Sin órdenes en esta categoría.</div>`;
+  } else {
+    html += filtered.map(o => orderCard(o)).join('');
+  }
+
+  document.getElementById('ventas-content').innerHTML = html;
+}
+
+function orderCard(o) {
+  const st      = statusInfo(o.status);
+  const isOpen  = S.expandedOrders.has(o.id);
+  const nItems  = (o.items||[]).length;
+  const stOpts  = Object.entries({
+    pending:'Pendiente','in-progress':'En proceso',completed:'Completada',
+    cancelled:'Cancelada',delivered:'Entregada'
+  }).map(([v,l])=>`<option value="${v}" ${v===o.status?'selected':''}>${l}</option>`).join('');
+
+  let detail = '';
+  if (isOpen) {
+    let itemsRows = (o.items||[]).map(item => {
+      const mat = S.materials.find(m=>m.id===item.materialId);
+      const pr  = S.printers.find(p=>p.id===item.printerId);
+      return `<tr>
+        <td>${item.name} ×${item.qty} — ${mat?.name||'?'} · ${pr?.name||'?'}</td>
+        <td>⌛ ${item.time}h / ${item.weight}g</td>
+      </tr>`;
+    }).join('');
+
+    detail = `
+      <div class="order-detail">
+        ${o.clientEmail ? `<div style="font-size:12px;color:var(--text-sub);margin-bottom:4px">✉ ${o.clientEmail}</div>` : ''}
+        ${o.clientPhone ? `<div style="font-size:12px;color:var(--text-sub);margin-bottom:8px">📞 ${o.clientPhone}</div>` : ''}
+        ${itemsRows ? `<table class="order-items-table">${itemsRows}</table>` : ''}
+        ${o.notes ? `<div style="font-size:11px;color:var(--text-sub);white-space:pre-line;margin-top:6px">📝 ${o.notes}</div>` : ''}
+      </div>
+      <div class="note-row">
+        <input class="input" id="note-${o.id}" placeholder="Agregar nota…" style="flex:1">
+        <button class="btn btn-ghost btn-sm" onclick="addNote('${o.id}')">+ Nota</button>
+      </div>`;
+  }
+
+  return `<div class="order-card${isOpen?' expanded':''}">
+    <div class="order-header" onclick="toggleOrder('${o.id}')">
+      <div>
+        <div style="font-weight:700;font-size:14px">${o.folio ? o.folio+'  ':''} ${o.clientName||'Sin nombre'}</div>
+        <div style="font-size:11px;color:var(--text-sub)">${nItems} pza${nItems!==1?'s':''} · ${(o.createdAt||'').slice(0,10)}</div>
+      </div>
+      <div class="row">
+        <select class="select" style="width:130px;color:${st.color};border-color:${st.color}30"
+          onclick="event.stopPropagation()"
+          onchange="updateOrderStatus('${o.id}',this.value)">${stOpts}</select>
+        <span style="font-weight:800;font-size:16px;color:var(--accent)">${fmt(o.total)}</span>
+        <span style="color:var(--text-sub);font-size:14px">${isOpen?'▾':'▸'}</span>
+        <button class="btn btn-danger btn-icon btn-sm" onclick="event.stopPropagation();deleteOrder('${o.id}')">🗑️</button>
+      </div>
+    </div>
+    ${detail}
+  </div>`;
+}
+
+function setVentasFilter(f) {
+  S.ventasFilter = f;
+  renderVentas();
+}
+
+function toggleOrder(id) {
+  if (S.expandedOrders.has(id)) S.expandedOrders.delete(id);
+  else S.expandedOrders.add(id);
+  renderVentas();
+}
+
+async function updateOrderStatus(id, status) {
+  await api.call('update_order_status', id, status);
+  S.orders = S.orders.map(o => o.id === id ? {...o, status} : o);
+  renderVentas();
+  toast('Estado actualizado');
+}
+
+async function addNote(id) {
+  const txt = document.getElementById('note-' + id)?.value?.trim();
+  if (!txt) return;
+  await api.call('add_order_note', id, txt);
+  S.orders = await api.call('get_orders');
+  toast('Nota guardada');
+  renderVentas();
+}
+
+async function deleteOrder(id) {
+  const o = S.orders.find(x => x.id === id);
+  confirm(`¿Eliminar orden de "${o?.clientName||'este cliente'}"?`, async () => {
+    await api.call('delete_order', id);
+    S.orders = S.orders.filter(x => x.id !== id);
+    S.expandedOrders.delete(id);
+    renderVentas();
+    toast('Orden eliminada');
+  });
+}
+
+// ══════════════════════════════════════════════════════════════════
+//  CONFIG
+// ══════════════════════════════════════════════════════════════════
+function renderConfig() {
+  const cfg = S.config;
+  const currencies = ['MXN','USD','EUR','COP','ARS','BRL'];
+
+  document.getElementById('config-content').innerHTML = `
+    <!-- Negocio -->
+    <div class="card" style="margin-bottom:14px">
+      <div class="section-lbl">🏢 Tu Negocio</div>
+      <div class="field-row">
+        <div><label class="field-label">Nombre del taller</label>
+          <input class="input" id="cfg-negocio" value="${cfg.negocio||''}"></div>
+        <div><label class="field-label">Contacto / Email</label>
+          <input class="input" id="cfg-contacto" value="${cfg.contacto||''}"></div>
+      </div>
+    </div>
+
+    <!-- Parámetros -->
+    <div class="card" style="margin-bottom:14px">
+      <div class="section-lbl">⚙️ Parámetros de Cotización</div>
+      <div class="grid-3" style="gap:24px;padding:0 4px 8px">
+        <div class="slider-group">
+          <label class="field-label">Merma operativa</label>
+          <div class="slider-val" id="merma-val">${(cfg.merma*100).toFixed(0)}%</div>
+          <input type="range" min="0" max="30" step="1" value="${(cfg.merma*100).toFixed(0)}"
+            oninput="document.getElementById('merma-val').textContent=this.value+'%'">
+          <div class="slider-desc">desperdicios, fallas</div>
+        </div>
+        <div class="slider-group">
+          <label class="field-label">Margen de ganancia</label>
+          <div class="slider-val" id="margen-val" style="color:var(--green)">${(cfg.margen*100).toFixed(0)}%</div>
+          <input type="range" class="green" min="5" max="100" step="1" value="${(cfg.margen*100).toFixed(0)}"
+            oninput="document.getElementById('margen-val').textContent=this.value+'%'">
+          <div class="slider-desc">tu ganancia final</div>
+        </div>
+        <div>
+          <label class="field-label">Costo electricidad</label>
+          <input type="number" step="0.01" class="input" id="cfg-elec" value="${cfg.electricidad_kwh||0.9}"
+            style="font-size:22px;font-weight:800;text-align:center;padding:12px">
+          <div class="slider-desc" style="text-align:center;margin-top:4px">${cfg.moneda||'MXN'} / kWh</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Moneda -->
+    <div class="card" style="margin-bottom:14px">
+      <div class="section-lbl">💱 Moneda</div>
+      <div class="currency-btns">
+        ${currencies.map(c=>`<button class="currency-btn${c===cfg.moneda?' active':''}" onclick="setCurrency('${c}')">${c}</button>`).join('')}
+      </div>
+    </div>
+
+    <!-- Fórmula -->
+    <div class="card" style="margin-bottom:14px">
+      <div class="section-lbl">📐 Fórmula activa</div>
+      <div style="font-family:'JetBrains Mono',monospace;padding:4px 0">
+        ${[
+          ['var(--accent)',  'Costo Material',  'Peso (g) × Costo/gramo'],
+          ['var(--blue)',    'Costo Máquina',   'Tiempo (h) × Costo/hora (por impresora)'],
+          ['var(--green)',   'Electricidad',    `kW × ${cfg.electricidad_kwh} ${cfg.moneda}/kWh × Tiempo`],
+          ['var(--yellow)',  'Subtotal',        'Material + Máquina + Extras multicolor'],
+          ['var(--purple)',  `+ Merma (${(cfg.merma*100).toFixed(0)}%)`, `Subtotal × ${(1+cfg.merma).toFixed(3)}`],
+          ['var(--accent)',  `PRECIO FINAL (+${(cfg.margen*100).toFixed(0)}%)`, `(Sub+Merma) × ${(1+cfg.margen).toFixed(3)}`],
+        ].map(([col, lbl, expr]) => `
+          <div class="formula-row">
+            <span class="formula-lbl" style="color:${col}">${lbl}</span>
+            <span style="color:var(--text-sub)">=</span>
+            <span class="formula-expr">${expr}</span>
+          </div>`).join('')}
+      </div>
+    </div>
+
+    <!-- Botones -->
+    <div class="row" style="gap:12px;padding-bottom:24px">
+      <button class="btn btn-primary" onclick="saveConfig()">💾 Guardar Configuración</button>
+      <button class="btn btn-ghost" onclick="resetConfig()">↺ Restablecer defaults</button>
+    </div>`;
+}
+
+function setCurrency(c) {
+  document.querySelectorAll('.currency-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent === c);
+  });
+  S.config.moneda = c;
+}
+
+async function saveConfig() {
+  const merma  = +document.getElementById('merma-val').textContent.replace('%','') / 100;
+  const margen = +document.getElementById('margen-val').textContent.replace('%','') / 100;
+  S.config = {
+    ...S.config,
+    negocio:         document.getElementById('cfg-negocio').value.trim(),
+    contacto:        document.getElementById('cfg-contacto').value.trim(),
+    merma,  margen,
+    electricidad_kwh: +document.getElementById('cfg-elec').value,
+  };
+  await api.call('save_config', S.config);
+  document.getElementById('biz-name-lbl').textContent = S.config.negocio || 'Mi Taller 3D';
+  toast('✅ Configuración guardada');
+  renderConfig();
+}
+
+async function resetConfig() {
+  confirm('¿Restablecer configuración a valores por defecto?', async () => {
+    S.config = await api.call('get_config');
+    await api.call('save_config', {negocio:'Mi Taller 3D',contacto:'',merma:0.05,margen:0.15,electricidad_kwh:0.9,moneda:'MXN',tema:S.config.tema});
+    S.config = await api.call('get_config');
+    renderConfig();
+    toast('Configuración restablecida');
+  });
+}
+</script>
+</body>
+</html>

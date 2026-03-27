@@ -1,0 +1,24 @@
+[
+  {
+    "id": "5e0a6c56-357d-4276-ba06-1ea302bef8c6",
+    "name": "Creality Ender 3 V3 SE",
+    "brand": "Creality",
+    "model": "Ender 3 V3 SE",
+    "type": "Cartesiana",
+    "costPerHour": 1.8,
+    "avgPowerW": 165,
+    "buildVolume": {
+      "x": 220,
+      "y": 220,
+      "z": 250
+    },
+    "maxTemp": 260,
+    "bedTemp": 100,
+    "maxSpeed": 250,
+    "amsType": "Single",
+    "colors": 1,
+    "multicolor": false,
+    "notes": "Auto-nivelación CR Touch. Entrada al mundo 3D.",
+    "active": true
+  }
+]

@@ -1,286 +1,312 @@
 #!/usr/bin/env python3
 """
-╔══════════════════════════════════════════════════════════╗
-║             Print3D Pro — Cotizador Profesional          ║
-║  Instalar:  pip install customtkinter                    ║
-║  Ejecutar:  python main.py                               ║
-╚══════════════════════════════════════════════════════════╝
+╔══════════════════════════════════════════╗
+║  Print3D Pro — Backend API para pywebview║
+║  pip install pywebview                   ║
+║  python main.py                          ║
+╚══════════════════════════════════════════╝
 """
 
-import customtkinter as ctk
-import tkinter as tk
+import webview
+import json
 import os
-import sys
+import uuid
+from datetime import datetime
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-sys.path.insert(0, BASE_DIR)
+HTML_FILE = os.path.join(BASE_DIR, "ui", "index.html")
 
-from data.constants  import DEFAULT_CONFIG
-from data.store      import load, save
-from themes.theme    import get_theme
-import modules.widgets as W
+FILES = {
+    "config":    os.path.join(BASE_DIR, "data", "config.json"),
+    "printers":  os.path.join(BASE_DIR, "data", "impresoras.json"),
+    "materials": os.path.join(BASE_DIR, "data", "materiales.json"),
+    "orders":    os.path.join(BASE_DIR, "data", "ordenes.json"),
+}
 
-from modules.tab_dashboard  import DashboardTab
-from modules.tab_cotizador  import CotizadorTab
-from modules.tab_impresoras import ImpresorasTab
-from modules.tab_materiales import MaterialesTab
-from modules.tab_ventas     import VentasTab
-from modules.tab_config     import ConfigTab
+DEFAULT_CONFIG = {
+    "negocio": "Mi Taller 3D",
+    "contacto": "",
+    "merma": 0.05,
+    "margen": 0.15,
+    "electricidad_kwh": 0.9,
+    "moneda": "MXN",
+    "tema": "dark",
+}
+
+# ── Asegurar carpeta data ──────────────────────────────────────────
+os.makedirs(os.path.join(BASE_DIR, "data"), exist_ok=True)
 
 
-class Print3DApp(ctk.CTk):
-    def __init__(self):
-        # ── Cargar datos ──
-        # BUG FIX: se renombra internamente como _cfg para evitar colisión
-        # con self.config() que es un método heredado de CTk
-        raw_cfg         = load("config", dict(DEFAULT_CONFIG))
-        self._app_cfg   = {**DEFAULT_CONFIG, **raw_cfg}   # merge seguro con defaults
-        self.printers   = load("printers",  [])
-        self.materials  = load("materials", [])
-        self.orders     = load("orders",    [])
-        self.theme_mode = self._app_cfg.get("tema", "dark")
+def _load(key, default):
+    try:
+        with open(FILES[key], "r", encoding="utf-8") as f:
+            return json.load(f)
+    except Exception:
+        return default
 
-        # ── Aplicar tema CTk antes del super().__init__() ──
-        theme = get_theme(self.theme_mode)
-        ctk.set_appearance_mode(theme["ctk_mode"])
-        ctk.set_default_color_theme(theme["ctk_theme"])
 
-        super().__init__()
+def _save(key, data):
+    with open(FILES[key], "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
 
-        W.set_theme(theme)
 
-        self.title("Print3D Pro")
-        self.geometry("1340x820")
-        self.minsize(1100, 680)
-        self._set_window_icon()
+def _calc_item(item, materials, printers, cfg):
+    mat     = next((m for m in materials if m["id"] == item.get("materialId")), None)
+    printer = next((p for p in printers  if p["id"] == item.get("printerId")),  None)
+    if not mat or not printer:
+        return None
+    w  = float(item.get("weight", 0))
+    t  = float(item.get("time",   0))
+    cost_mat  = w * float(mat.get("costPerGram", 0))
+    cost_mach = float(printer.get("costPerHour", 0)) * t
+    cost_elec = (float(printer.get("avgPowerW", 200)) / 1000) * float(cfg.get("electricidad_kwh", 0.9)) * t
+    multi = sum(
+        float(layer.get("purgeGrams", 5)) *
+        float(next((m for m in materials if m["id"] == layer.get("materialId")), {}).get("costPerGram", 0))
+        for layer in item.get("multicolorLayers", [])
+    )
+    sub   = cost_mat + cost_mach + multi
+    sub_m = sub   * (1 + float(cfg.get("merma",   0.05)))
+    final = sub_m * (1 + float(cfg.get("margen", 0.15)))
+    return {
+        "costMaterial":  round(cost_mat,  2),
+        "costMachine":   round(cost_mach, 2),
+        "costElec":      round(cost_elec, 2),
+        "multiExtra":    round(multi,     2),
+        "subtotal":      round(sub,       2),
+        "subtotalMerma": round(sub_m,     2),
+        "precioFinal":   round(final,     2),
+    }
 
-        self.grid_columnconfigure(1, weight=1)
-        self.grid_rowconfigure(0, weight=1)
 
-        self._build_sidebar()
-        self._build_content()
-        self._create_tabs()
-        self.show("dashboard")
+# ══════════════════════════════════════════════════════════════════
+#  API EXPUESTA AL FRONTEND (métodos accesibles desde JS)
+# ══════════════════════════════════════════════════════════════════
 
-    # ── Propiedad config para que los módulos usen app.config normalmente ──
-    @property
-    def config(self):
-        return self._app_cfg
+class API:
+    """Cada método público es callable desde JS con window.pywebview.api.metodo()"""
 
-    @config.setter
-    def config(self, value):
-        self._app_cfg = value
+    # ── Config ────────────────────────────────────────────────────
 
-    # ─────────────────────────────────────────────────────────
-    # SIDEBAR
-    # ─────────────────────────────────────────────────────────
+    def get_config(self):
+        cfg = _load("config", dict(DEFAULT_CONFIG))
+        return {**DEFAULT_CONFIG, **cfg}
 
-    def _build_sidebar(self):
-        self.sidebar = ctk.CTkFrame(self, width=220,
-                                    fg_color=W.T("bg_sidebar"),
-                                    corner_radius=0)
-        self.sidebar.grid(row=0, column=0, sticky="nsew")
-        self.sidebar.grid_propagate(False)   # FIX: mantiene ancho fijo
+    def save_config(self, data):
+        _save("config", data)
+        return {"ok": True}
 
-        logo_frame = ctk.CTkFrame(self.sidebar, fg_color="transparent")
-        logo_frame.pack(fill="x", padx=16, pady=(22, 6))
+    # ── Impresoras ────────────────────────────────────────────────
 
-        ctk.CTkLabel(logo_frame, text="⬡ Print3D Pro",
-                     font=ctk.CTkFont("DM Sans", 20, "bold"),
-                     text_color=W.T("accent")).pack(anchor="w")
+    def get_printers(self):
+        return _load("printers", [])
 
-        self.biz_name_label = ctk.CTkLabel(
-            logo_frame,
-            text=self._app_cfg.get("negocio", "Mi Taller 3D"),
-            font=ctk.CTkFont("DM Sans", 11),
-            text_color=W.T("text_sub"))
-        self.biz_name_label.pack(anchor="w")
+    def save_printers(self, data):
+        _save("printers", data)
+        return {"ok": True}
 
-        ctk.CTkFrame(self.sidebar, height=1,
-                     fg_color=W.T("border")).pack(fill="x", padx=10, pady=10)
+    def add_printer(self, data):
+        printers = _load("printers", [])
+        data["id"] = str(uuid.uuid4())
+        printers.append(data)
+        _save("printers", printers)
+        return {"ok": True, "id": data["id"]}
 
-        self.tab_buttons = {}
-        TABS = [
-            ("dashboard",  "📊", "Dashboard"),
-            ("cotizador",  "💰", "Cotizador"),
-            ("impresoras", "🖨️", "Impresoras"),
-            ("materiales", "🧵", "Materiales"),
-            ("ventas",     "📦", "Ventas"),
-            ("config",     "⚙️",  "Configuración"),
-        ]
-        for key, icon, label in TABS:
-            b = ctk.CTkButton(
-                self.sidebar,
-                text=f"  {icon}  {label}",
-                anchor="w",
-                fg_color="transparent",
-                text_color=W.T("text_sub"),
-                hover_color=W.T("bg_hover"),
-                font=ctk.CTkFont("DM Sans", 13),
-                corner_radius=8,
-                height=40,
-                command=lambda k=key: self.show(k),
-            )
-            b.pack(fill="x", padx=10, pady=2)
-            self.tab_buttons[key] = b
+    def update_printer(self, data):
+        printers = _load("printers", [])
+        printers = [data if p["id"] == data["id"] else p for p in printers]
+        _save("printers", printers)
+        return {"ok": True}
 
-        ctk.CTkFrame(self.sidebar, fg_color="transparent").pack(fill="both", expand=True)
-        ctk.CTkFrame(self.sidebar, height=1,
-                     fg_color=W.T("border")).pack(fill="x", padx=10, pady=6)
+    def delete_printer(self, printer_id):
+        printers = [p for p in _load("printers", []) if p["id"] != printer_id]
+        _save("printers", printers)
+        return {"ok": True}
 
-        # ── Toggle tema ──
-        theme_frame = ctk.CTkFrame(self.sidebar, fg_color="transparent")
-        theme_frame.pack(fill="x", padx=14, pady=(0, 8))
+    def toggle_printer(self, printer_id):
+        printers = _load("printers", [])
+        for p in printers:
+            if p["id"] == printer_id:
+                p["active"] = not p.get("active", True)
+        _save("printers", printers)
+        return {"ok": True}
 
-        self._theme_icon_lbl = ctk.CTkLabel(
-            theme_frame,
-            text="🌙" if self.theme_mode == "dark" else "☀️",
-            font=ctk.CTkFont("DM Sans", 18),
-            width=32)
-        self._theme_icon_lbl.pack(side="left")
+    # ── Materiales ────────────────────────────────────────────────
 
-        self._theme_label = ctk.CTkLabel(
-            theme_frame,
-            text="Tema oscuro" if self.theme_mode == "dark" else "Tema claro",
-            font=ctk.CTkFont("DM Sans", 11),
-            text_color=W.T("text_sub"))
-        self._theme_label.pack(side="left", padx=6)
+    def get_materials(self):
+        return _load("materials", [])
 
-        self._theme_toggle = ctk.CTkSwitch(
-            theme_frame, text="",
-            command=self._toggle_theme,
-            progress_color=W.T("accent"),
-            button_color=W.T("accent"),
-            width=46,
-            onvalue=True, offvalue=False,
+    def save_materials(self, data):
+        _save("materials", data)
+        return {"ok": True}
+
+    def add_material(self, data):
+        materials = _load("materials", [])
+        data["id"] = str(uuid.uuid4())
+        materials.append(data)
+        _save("materials", materials)
+        return {"ok": True, "id": data["id"]}
+
+    def update_material(self, data):
+        materials = _load("materials", [])
+        materials = [data if m["id"] == data["id"] else m for m in materials]
+        _save("materials", materials)
+        return {"ok": True}
+
+    def delete_material(self, mat_id):
+        materials = [m for m in _load("materials", []) if m["id"] != mat_id]
+        _save("materials", materials)
+        return {"ok": True}
+
+    def discount_material(self, mat_id, grams):
+        materials = _load("materials", [])
+        for m in materials:
+            if m["id"] == mat_id:
+                m["usedGrams"] = min(
+                    float(m.get("spoolWeight", 1000)),
+                    float(m.get("usedGrams", 0)) + float(grams)
+                )
+        _save("materials", materials)
+        return {"ok": True}
+
+    def reset_spool(self, mat_id):
+        materials = _load("materials", [])
+        for m in materials:
+            if m["id"] == mat_id:
+                m["usedGrams"] = 0
+        _save("materials", materials)
+        return {"ok": True}
+
+    # ── Órdenes ───────────────────────────────────────────────────
+
+    def get_orders(self):
+        return _load("orders", [])
+
+    def save_order(self, order_data):
+        orders = _load("orders", [])
+        cfg    = {**DEFAULT_CONFIG, **_load("config", {})}
+        order_data["id"]        = str(uuid.uuid4())
+        order_data["folio"]     = f"ORD-{len(orders)+1:04d}"
+        order_data["createdAt"] = datetime.now().isoformat()
+        order_data["status"]    = "pending"
+        # Recalcular total server-side
+        materials = _load("materials", [])
+        printers  = _load("printers",  [])
+        total = sum(
+            (_calc_item(it, materials, printers, cfg) or {}).get("precioFinal", 0) * int(it.get("qty", 1))
+            for it in order_data.get("items", [])
         )
-        self._theme_toggle.pack(side="right")
-        if self.theme_mode == "dark":
-            self._theme_toggle.select()
+        order_data["total"] = round(total, 2)
+        orders.append(order_data)
+        _save("orders", orders)
+        return {"ok": True, "order": order_data}
 
-        ctk.CTkLabel(self.sidebar, text="v2.0 · Print3D Pro",
-                     font=ctk.CTkFont("DM Sans", 9),
-                     text_color=W.T("text_dim")).pack(pady=(0, 10))
+    def update_order_status(self, order_id, status):
+        orders = _load("orders", [])
+        for o in orders:
+            if o["id"] == order_id:
+                o["status"] = status
+        _save("orders", orders)
+        return {"ok": True}
 
-    # ─────────────────────────────────────────────────────────
-    # CONTENT
-    # ─────────────────────────────────────────────────────────
+    def add_order_note(self, order_id, note):
+        orders = _load("orders", [])
+        stamp  = f"[{datetime.now().strftime('%d/%m/%Y')}] {note}"
+        for o in orders:
+            if o["id"] == order_id:
+                existing = o.get("notes", "")
+                o["notes"] = f"{existing}\n{stamp}".strip()
+        _save("orders", orders)
+        return {"ok": True}
 
-    def _build_content(self):
-        self.container = ctk.CTkFrame(self, fg_color=W.T("bg"), corner_radius=0)
-        self.container.grid(row=0, column=1, sticky="nsew")
+    def delete_order(self, order_id):
+        orders = [o for o in _load("orders", []) if o["id"] != order_id]
+        _save("orders", orders)
+        return {"ok": True}
 
-    def _create_tabs(self):
-        self.frames = {}
-        tab_classes = {
-            "dashboard":  DashboardTab,
-            "cotizador":  CotizadorTab,
-            "impresoras": ImpresorasTab,
-            "materiales": MaterialesTab,
-            "ventas":     VentasTab,
-            "config":     ConfigTab,
-        }
-        for name, cls in tab_classes.items():
-            frame = cls(self.container, self)
-            frame.place(relx=0, rely=0, relwidth=1, relheight=1)
-            self.frames[name] = frame
+    # ── Cálculo ───────────────────────────────────────────────────
 
-    # ─────────────────────────────────────────────────────────
-    # NAVEGACIÓN
-    # ─────────────────────────────────────────────────────────
+    def calc_item(self, item):
+        cfg       = {**DEFAULT_CONFIG, **_load("config",    {})}
+        materials = _load("materials", [])
+        printers  = _load("printers",  [])
+        return _calc_item(item, materials, printers, cfg) or {}
 
-    def show(self, name: str):
-        frame = self.frames.get(name)
-        if not frame:
-            return
-        frame.tkraise()
-        if hasattr(frame, "refresh"):
-            frame.refresh()
-
-        for k, btn in self.tab_buttons.items():
-            if k == name:
-                btn.configure(fg_color=W.T("bg_selected"),
-                              text_color=W.T("accent"))
+    def calc_quote(self, items):
+        cfg       = {**DEFAULT_CONFIG, **_load("config",    {})}
+        materials = _load("materials", [])
+        printers  = _load("printers",  [])
+        results = []
+        total   = 0.0
+        for item in items:
+            c = _calc_item(item, materials, printers, cfg)
+            if c:
+                line_total = c["precioFinal"] * int(item.get("qty", 1))
+                total += line_total
+                results.append({**c, "lineTotal": round(line_total, 2)})
             else:
-                btn.configure(fg_color="transparent",
-                              text_color=W.T("text_sub"))
+                results.append({})
+        return {"items": results, "total": round(total, 2)}
 
-    # ─────────────────────────────────────────────────────────
-    # TEMA
-    # ─────────────────────────────────────────────────────────
+    # ── Stats para dashboard ───────────────────────────────────────
 
-    def _toggle_theme(self):
-        self.theme_mode = "light" if self.theme_mode == "dark" else "dark"
-        self._app_cfg["tema"] = self.theme_mode
-        self.save_config()
+    def get_stats(self):
+        orders    = _load("orders",    [])
+        materials = _load("materials", [])
+        printers  = _load("printers",  [])
+        cfg       = {**DEFAULT_CONFIG, **_load("config", {})}
+        completed = [o for o in orders if o.get("status") == "completed"]
+        pending   = [o for o in orders if o.get("status") == "pending"]
+        inprog    = [o for o in orders if o.get("status") == "in-progress"]
+        revenue   = sum(o.get("total", 0) for o in completed)
+        expected  = sum(o.get("total", 0) for o in pending + inprog)
+        low_stock = [
+            m for m in materials
+            if (float(m.get("spoolWeight", 1000)) - float(m.get("usedGrams", 0)))
+               / max(float(m.get("spoolWeight", 1000)), 1) < 0.20
+        ]
+        return {
+            "totalOrders":     len(orders),
+            "pending":         len(pending),
+            "inProgress":      len(inprog),
+            "completed":       len(completed),
+            "revenue":         round(revenue, 2),
+            "expected":        round(expected, 2),
+            "activePrinters":  sum(1 for p in printers if p.get("active", True)),
+            "totalPrinters":   len(printers),
+            "totalMaterials":  len(materials),
+            "lowStock":        len(low_stock),
+            "moneda":          cfg.get("moneda", "MXN"),
+        }
 
-        theme = get_theme(self.theme_mode)
-        ctk.set_appearance_mode(theme["ctk_mode"])
-        W.set_theme(theme)
+    # ── Catálogos (para dropdowns) ─────────────────────────────────
 
-        # FIX: actualizar iconos del sidebar ANTES del rebuild
-        self._theme_icon_lbl.configure(
-            text="☀️" if self.theme_mode == "light" else "🌙")
-        self._theme_label.configure(
-            text="Tema claro" if self.theme_mode == "light" else "Tema oscuro")
+    def get_catalogs(self):
+        """Devuelve los catálogos de marcas/modelos al frontend."""
+        from data.constants import PRINTER_BRANDS, FILAMENT_BRANDS, FILAMENT_TYPES, FILAMENT_COLORS, AMS_TYPES
+        return {
+            "printerBrands": PRINTER_BRANDS,
+            "filamentBrands": FILAMENT_BRANDS,
+            "filamentTypes": FILAMENT_TYPES,
+            "filamentColors": FILAMENT_COLORS,
+            "amsTypes": AMS_TYPES,
+        }
 
-        self.toast("🎨 Tema cambiado — reiniciando UI…")
-        self.after(400, self._full_rebuild)
 
-    def _full_rebuild(self):
-        """
-        FIX CRÍTICO: destruir widgets y reconstruir completamente.
-        El bug original era que self.frames seguía referenciando frames
-        destruidos, causando errores de Tcl al hacer refresh().
-        """
-        # Limpiar referencias ANTES de destruir widgets
-        self.frames = {}
-        self.tab_buttons = {}
-
-        # Destruir contenido visual
-        for widget in self.winfo_children():
-            widget.destroy()
-
-        # Reconstruir todo
-        self.grid_columnconfigure(1, weight=1)
-        self.grid_rowconfigure(0, weight=1)
-        self._build_sidebar()
-        self._build_content()
-        self._create_tabs()
-        self.show("dashboard")
-
-    # ─────────────────────────────────────────────────────────
-    # PERSISTENCIA
-    # ─────────────────────────────────────────────────────────
-
-    def save_config(self):
-        save("config", self._app_cfg)
-
-    def save_printers(self):
-        save("printers", self.printers)
-
-    def save_materials(self):
-        save("materials", self.materials)
-
-    def save_orders(self):
-        save("orders", self.orders)
-
-    # ─────────────────────────────────────────────────────────
-    # TOAST
-    # ─────────────────────────────────────────────────────────
-
-    def toast(self, msg: str, ok: bool = True):
-        W.Toast(self, msg, ok)
-
-    def _set_window_icon(self):
-        try:
-            icon_path = os.path.join(BASE_DIR, "assets", "icon.ico")
-            if os.path.exists(icon_path):
-                self.iconbitmap(icon_path)
-        except Exception:
-            pass
-
+# ══════════════════════════════════════════════════════════════════
+#  ENTRY POINT
+# ══════════════════════════════════════════════════════════════════
 
 if __name__ == "__main__":
-    app = Print3DApp()
-    app.mainloop()
+    api    = API()
+    window = webview.create_window(
+        title      = "⬡ Print3D Pro",
+        url        = HTML_FILE,
+        js_api     = api,
+        width      = 1340,
+        height     = 820,
+        min_size   = (1100, 680),
+        resizable  = True,
+        background_color = "#0a0a0a",
+    )
+    webview.start(debug=False)
