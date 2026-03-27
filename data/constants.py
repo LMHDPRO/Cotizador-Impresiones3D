@@ -25,6 +25,34 @@ PRINTER_BRANDS = {
                 "materials": ["PLA", "PETG", "ABS", "ASA", "TPU", "PA", "PC"],
                 "notes": "AMS hasta 4 materiales simultáneos. Cámara con AI.",
             },
+            "X1 Carbon Combo": {
+                "type": "CoreXY",
+                "buildVolume": {"x": 256, "y": 256, "z": 256},
+                "maxSpeed": 500,
+                "maxTemp": 300,
+                "bedTemp": 120,
+                "avgPowerW": 420,
+                "costPerHour": 5.5,
+                "multicolor": True,
+                "colors": 16,
+                "amsType": "AMS",
+                "materials": ["PLA", "PETG", "ABS", "ASA", "TPU", "PA", "PC"],
+                "notes": "4 AMS = 16 materiales. La bestia multicolor de Bambu.",
+            },
+            "X1E": {
+                "type": "CoreXY",
+                "buildVolume": {"x": 256, "y": 256, "z": 256},
+                "maxSpeed": 500,
+                "maxTemp": 320,
+                "bedTemp": 120,
+                "avgPowerW": 450,
+                "costPerHour": 6.0,
+                "multicolor": True,
+                "colors": 4,
+                "amsType": "AMS",
+                "materials": ["PLA", "PETG", "ABS", "ASA", "TPU", "PA", "PC", "PEI", "Carbon"],
+                "notes": "Versión Enterprise. Soporte materiales técnicos avanzados.",
+            },
             "P1S": {
                 "type": "CoreXY",
                 "buildVolume": {"x": 256, "y": 256, "z": 256},
@@ -81,6 +109,34 @@ PRINTER_BRANDS = {
                 "materials": ["PLA", "PETG", "TPU"],
                 "notes": "Compacta con AMS Lite. Perfecta para escritorio.",
             },
+            "A1 Mini Combo": {
+                "type": "Cartesiana",
+                "buildVolume": {"x": 180, "y": 180, "z": 180},
+                "maxSpeed": 500,
+                "maxTemp": 280,
+                "bedTemp": 80,
+                "avgPowerW": 230,
+                "costPerHour": 3.2,
+                "multicolor": True,
+                "colors": 4,
+                "amsType": "AMS Lite",
+                "materials": ["PLA", "PETG", "TPU"],
+                "notes": "Mini con AMS Lite incluido.",
+            },
+            "H2D": {
+                "type": "CoreXY",
+                "buildVolume": {"x": 350, "y": 320, "z": 320},
+                "maxSpeed": 600,
+                "maxTemp": 320,
+                "bedTemp": 120,
+                "avgPowerW": 500,
+                "costPerHour": 7.0,
+                "multicolor": True,
+                "colors": 4,
+                "amsType": "AMS",
+                "materials": ["PLA", "PETG", "ABS", "ASA", "TPU", "PA", "PC", "Carbon"],
+                "notes": "2025: Doble extrusor IDEX + AMS. La más versátil de Bambu.",
+            },
         }
     },
     "Creality": {
@@ -101,6 +157,20 @@ PRINTER_BRANDS = {
                 "materials": ["PLA", "PETG", "TPU"],
                 "notes": "Auto-nivelación CR Touch. Entrada al mundo 3D.",
             },
+            "Ender 3 V3 KE": {
+                "type": "CoreXY",
+                "buildVolume": {"x": 220, "y": 220, "z": 240},
+                "maxSpeed": 500,
+                "maxTemp": 300,
+                "bedTemp": 90,
+                "avgPowerW": 220,
+                "costPerHour": 2.5,
+                "multicolor": False,
+                "colors": 1,
+                "amsType": "Single",
+                "materials": ["PLA", "PETG", "ABS", "TPU"],
+                "notes": "CoreXY compacto alta velocidad. Auto-nivelación.",
+            },
             "Ender 3 S1 Pro": {
                 "type": "Cartesiana",
                 "buildVolume": {"x": 220, "y": 220, "z": 270},
@@ -115,19 +185,33 @@ PRINTER_BRANDS = {
                 "materials": ["PLA", "PETG", "ABS", "ASA", "TPU", "PA"],
                 "notes": "Extrusor directo Sprite Pro. Pantalla táctil.",
             },
-            "Ender 3 V3 KE": {
+            "Ender-3 V3 Plus": {
                 "type": "CoreXY",
-                "buildVolume": {"x": 220, "y": 220, "z": 240},
-                "maxSpeed": 500,
+                "buildVolume": {"x": 300, "y": 300, "z": 330},
+                "maxSpeed": 600,
                 "maxTemp": 300,
-                "bedTemp": 90,
-                "avgPowerW": 220,
-                "costPerHour": 2.5,
+                "bedTemp": 100,
+                "avgPowerW": 280,
+                "costPerHour": 3.2,
                 "multicolor": False,
                 "colors": 1,
                 "amsType": "Single",
                 "materials": ["PLA", "PETG", "ABS", "TPU"],
-                "notes": "CoreXY compacto alta velocidad. Auto-nivelación.",
+                "notes": "2024: Gran volumen CoreXY a precio accesible.",
+            },
+            "K1": {
+                "type": "CoreXY",
+                "buildVolume": {"x": 220, "y": 220, "z": 250},
+                "maxSpeed": 600,
+                "maxTemp": 300,
+                "bedTemp": 100,
+                "avgPowerW": 300,
+                "costPerHour": 3.5,
+                "multicolor": False,
+                "colors": 1,
+                "amsType": "Single",
+                "materials": ["PLA", "PETG", "ABS", "ASA", "TPU"],
+                "notes": "Alta velocidad cámara cerrada. Klipper.",
             },
             "K1 Max": {
                 "type": "CoreXY",
@@ -143,6 +227,20 @@ PRINTER_BRANDS = {
                 "materials": ["PLA", "PETG", "ABS", "ASA", "TPU", "PA"],
                 "notes": "Gran volumen, alta velocidad. Cámara cerrada.",
             },
+            "K1C": {
+                "type": "CoreXY",
+                "buildVolume": {"x": 220, "y": 220, "z": 250},
+                "maxSpeed": 600,
+                "maxTemp": 320,
+                "bedTemp": 120,
+                "avgPowerW": 320,
+                "costPerHour": 4.0,
+                "multicolor": False,
+                "colors": 1,
+                "amsType": "Single",
+                "materials": ["PLA", "PETG", "ABS", "ASA", "TPU", "PA", "Carbon"],
+                "notes": "2024: K1 con hardened steel. Compatible materiales abrasivos.",
+            },
             "K2 Plus Combo": {
                 "type": "CoreXY",
                 "buildVolume": {"x": 350, "y": 350, "z": 350},
@@ -157,12 +255,40 @@ PRINTER_BRANDS = {
                 "materials": ["PLA", "PETG", "ABS", "ASA", "TPU", "PA", "PC"],
                 "notes": "CFS 4 colores. Enorme volumen de impresión.",
             },
+            "Sermoon D3": {
+                "type": "CoreXY",
+                "buildVolume": {"x": 300, "y": 250, "z": 300},
+                "maxSpeed": 200,
+                "maxTemp": 320,
+                "bedTemp": 120,
+                "avgPowerW": 400,
+                "costPerHour": 4.5,
+                "multicolor": True,
+                "colors": 2,
+                "amsType": "IDEX",
+                "materials": ["PLA", "PETG", "ABS", "ASA", "TPU", "PA", "PC"],
+                "notes": "IDEX doble extrusor. Materiales técnicos.",
+            },
         }
     },
     "Elegoo": {
         "logo": "elegoo.png",
         "color": "#00d4aa",
         "models": {
+            "Neptune 4": {
+                "type": "Cartesiana",
+                "buildVolume": {"x": 225, "y": 225, "z": 265},
+                "maxSpeed": 250,
+                "maxTemp": 280,
+                "bedTemp": 90,
+                "avgPowerW": 200,
+                "costPerHour": 2.0,
+                "multicolor": False,
+                "colors": 1,
+                "amsType": "Single",
+                "materials": ["PLA", "PETG", "TPU"],
+                "notes": "Klipper. Buena relación precio/calidad.",
+            },
             "Neptune 4 Pro": {
                 "type": "Cartesiana",
                 "buildVolume": {"x": 225, "y": 225, "z": 265},
@@ -176,6 +302,20 @@ PRINTER_BRANDS = {
                 "amsType": "Single",
                 "materials": ["PLA", "PETG", "ABS", "ASA", "TPU", "PA"],
                 "notes": "Klipper integrado. Velocidad competitiva.",
+            },
+            "Neptune 4 Plus": {
+                "type": "Cartesiana",
+                "buildVolume": {"x": 320, "y": 320, "z": 385},
+                "maxSpeed": 500,
+                "maxTemp": 300,
+                "bedTemp": 110,
+                "avgPowerW": 320,
+                "costPerHour": 3.0,
+                "multicolor": False,
+                "colors": 1,
+                "amsType": "Single",
+                "materials": ["PLA", "PETG", "ABS", "ASA", "TPU"],
+                "notes": "Volumen grande con Klipper.",
             },
             "Neptune 4 Max": {
                 "type": "Cartesiana",
@@ -191,19 +331,47 @@ PRINTER_BRANDS = {
                 "materials": ["PLA", "PETG", "ABS", "ASA", "TPU"],
                 "notes": "Volumen gigante para piezas grandes.",
             },
-            "Centauri 2": {
+            "Centauri Carbon": {
                 "type": "CoreXY",
                 "buildVolume": {"x": 350, "y": 350, "z": 350},
                 "maxSpeed": 500,
-                "maxTemp": 300,
+                "maxTemp": 320,
                 "bedTemp": 120,
                 "avgPowerW": 380,
-                "costPerHour": 4.0,
+                "costPerHour": 4.5,
                 "multicolor": False,
                 "colors": 1,
                 "amsType": "Single",
-                "materials": ["PLA", "PETG", "ABS", "ASA", "TPU", "PA"],
-                "notes": "350³mm, CoreXY de alto rendimiento.",
+                "materials": ["PLA", "PETG", "ABS", "ASA", "TPU", "PA", "Carbon"],
+                "notes": "2024: CoreXY premium materiales abrasivos.",
+            },
+            "Saturn 4 Ultra": {
+                "type": "MSLA (Resina)",
+                "buildVolume": {"x": 218, "y": 123, "z": 220},
+                "maxSpeed": 0,
+                "maxTemp": 0,
+                "bedTemp": 0,
+                "avgPowerW": 100,
+                "costPerHour": 2.0,
+                "multicolor": False,
+                "colors": 1,
+                "amsType": "Single",
+                "materials": ["Resina (MSLA/SLA)"],
+                "notes": "12K MSLA. Máxima resolución en resina.",
+            },
+            "Jupiter SE": {
+                "type": "MSLA (Resina)",
+                "buildVolume": {"x": 277, "y": 156, "z": 300},
+                "maxSpeed": 0,
+                "maxTemp": 0,
+                "bedTemp": 0,
+                "avgPowerW": 120,
+                "costPerHour": 2.5,
+                "multicolor": False,
+                "colors": 1,
+                "amsType": "Single",
+                "materials": ["Resina (MSLA/SLA)"],
+                "notes": "Gran formato MSLA. Figuras y modelos grandes.",
             },
         }
     },
@@ -239,6 +407,34 @@ PRINTER_BRANDS = {
                 "materials": ["PLA", "PETG", "ABS", "TPU"],
                 "notes": "Formato gigante para proyectos grandes.",
             },
+            "Kobra 2 Neo": {
+                "type": "Cartesiana",
+                "buildVolume": {"x": 220, "y": 220, "z": 250},
+                "maxSpeed": 250,
+                "maxTemp": 260,
+                "bedTemp": 80,
+                "avgPowerW": 170,
+                "costPerHour": 1.8,
+                "multicolor": False,
+                "colors": 1,
+                "amsType": "Single",
+                "materials": ["PLA", "PETG", "TPU"],
+                "notes": "Entrada al mundo 3D. Precio bajo.",
+            },
+            "Kobra 3": {
+                "type": "Cartesiana",
+                "buildVolume": {"x": 250, "y": 250, "z": 260},
+                "maxSpeed": 600,
+                "maxTemp": 260,
+                "bedTemp": 90,
+                "avgPowerW": 260,
+                "costPerHour": 2.8,
+                "multicolor": False,
+                "colors": 1,
+                "amsType": "Single",
+                "materials": ["PLA", "PETG", "TPU"],
+                "notes": "2024: Alta velocidad con LeviQ 3.0.",
+            },
             "Kobra 3 Combo": {
                 "type": "Cartesiana",
                 "buildVolume": {"x": 250, "y": 250, "z": 260},
@@ -252,6 +448,48 @@ PRINTER_BRANDS = {
                 "amsType": "ACE Pro",
                 "materials": ["PLA", "PETG", "TPU"],
                 "notes": "ACE Pro 4 colores simultáneos.",
+            },
+            "Kobra S1 Combo": {
+                "type": "CoreXY",
+                "buildVolume": {"x": 300, "y": 300, "z": 300},
+                "maxSpeed": 800,
+                "maxTemp": 280,
+                "bedTemp": 110,
+                "avgPowerW": 380,
+                "costPerHour": 4.5,
+                "multicolor": True,
+                "colors": 8,
+                "amsType": "ACE Pro",
+                "materials": ["PLA", "PETG", "ABS", "TPU"],
+                "notes": "2025: CoreXY 800mm/s + 2 ACE Pro = 8 colores.",
+            },
+            "Photon Mono M7 Pro": {
+                "type": "MSLA (Resina)",
+                "buildVolume": {"x": 200, "y": 122, "z": 200},
+                "maxSpeed": 0,
+                "maxTemp": 0,
+                "bedTemp": 0,
+                "avgPowerW": 80,
+                "costPerHour": 1.8,
+                "multicolor": False,
+                "colors": 1,
+                "amsType": "Single",
+                "materials": ["Resina (MSLA/SLA)"],
+                "notes": "12K MSLA. Gran detalle para miniaturas.",
+            },
+            "Photon Mono X2": {
+                "type": "MSLA (Resina)",
+                "buildVolume": {"x": 196, "y": 122, "z": 200},
+                "maxSpeed": 0,
+                "maxTemp": 0,
+                "bedTemp": 0,
+                "avgPowerW": 80,
+                "costPerHour": 1.5,
+                "multicolor": False,
+                "colors": 1,
+                "amsType": "Single",
+                "materials": ["Resina (MSLA/SLA)"],
+                "notes": "9K MSLA. Precio accesible.",
             },
         }
     },
@@ -273,6 +511,20 @@ PRINTER_BRANDS = {
                 "materials": ["PLA", "PETG", "ABS", "ASA", "TPU", "PA", "PC"],
                 "notes": "MMU3 hasta 5 materiales. Confiabilidad legendaria.",
             },
+            "MK4": {
+                "type": "Cartesiana",
+                "buildVolume": {"x": 250, "y": 210, "z": 220},
+                "maxSpeed": 200,
+                "maxTemp": 290,
+                "bedTemp": 100,
+                "avgPowerW": 240,
+                "costPerHour": 3.2,
+                "multicolor": False,
+                "colors": 1,
+                "amsType": "Single",
+                "materials": ["PLA", "PETG", "ABS", "ASA", "TPU", "PA"],
+                "notes": "La más confiable del mercado. Actualizable a MK4S.",
+            },
             "MINI+": {
                 "type": "Cartesiana",
                 "buildVolume": {"x": 180, "y": 180, "z": 180},
@@ -287,7 +539,7 @@ PRINTER_BRANDS = {
                 "materials": ["PLA", "PETG", "ABS", "ASA", "TPU"],
                 "notes": "Compacta de alta calidad. Ideal para piezas pequeñas.",
             },
-            "XL": {
+            "XL 5-Tool": {
                 "type": "CoreXY",
                 "buildVolume": {"x": 360, "y": 360, "z": 360},
                 "maxSpeed": 500,
@@ -301,12 +553,40 @@ PRINTER_BRANDS = {
                 "materials": ["PLA", "PETG", "ABS", "ASA", "TPU", "PA", "PC"],
                 "notes": "Multi-tool hasta 5 cabezales. Máxima versatilidad.",
             },
+            "Core One": {
+                "type": "CoreXY",
+                "buildVolume": {"x": 250, "y": 220, "z": 270},
+                "maxSpeed": 500,
+                "maxTemp": 290,
+                "bedTemp": 120,
+                "avgPowerW": 280,
+                "costPerHour": 4.0,
+                "multicolor": True,
+                "colors": 5,
+                "amsType": "MMU3",
+                "materials": ["PLA", "PETG", "ABS", "ASA", "TPU", "PA", "PC"],
+                "notes": "2024: Primera CoreXY de Prusa. Compatible MMU3.",
+            },
         }
     },
     "Flashforge": {
         "logo": "flashforge.png",
         "color": "#a78bfa",
         "models": {
+            "Adventurer 5M": {
+                "type": "CoreXY",
+                "buildVolume": {"x": 220, "y": 220, "z": 220},
+                "maxSpeed": 600,
+                "maxTemp": 280,
+                "bedTemp": 110,
+                "avgPowerW": 280,
+                "costPerHour": 2.8,
+                "multicolor": False,
+                "colors": 1,
+                "amsType": "Single",
+                "materials": ["PLA", "PETG", "ABS", "ASA", "TPU"],
+                "notes": "Alta velocidad cámara cerrada. Extrusor fácil cambio.",
+            },
             "Adventurer 5M Pro": {
                 "type": "CoreXY",
                 "buildVolume": {"x": 220, "y": 220, "z": 220},
@@ -334,6 +614,141 @@ PRINTER_BRANDS = {
                 "amsType": "IDEX",
                 "materials": ["PLA", "PETG", "ABS", "ASA", "TPU", "PA", "PC", "PEI"],
                 "notes": "IDEX doble extrusor. Materiales técnicos avanzados.",
+            },
+            "Guider 3 Plus": {
+                "type": "Cartesiana",
+                "buildVolume": {"x": 300, "y": 250, "z": 350},
+                "maxSpeed": 150,
+                "maxTemp": 330,
+                "bedTemp": 120,
+                "avgPowerW": 400,
+                "costPerHour": 4.0,
+                "multicolor": False,
+                "colors": 1,
+                "amsType": "Single",
+                "materials": ["PLA", "PETG", "ABS", "ASA", "PA", "PC"],
+                "notes": "Industrial. Cámara filtrada HEPA.",
+            },
+        }
+    },
+    "Bambu Lab (Resina)": {
+        "logo": "bambu.png",
+        "color": "#4ade80",
+        "models": {
+            "Photon Ultra": {
+                "type": "DLP (Resina)",
+                "buildVolume": {"x": 102, "y": 58, "z": 165},
+                "maxSpeed": 0,
+                "maxTemp": 0,
+                "bedTemp": 0,
+                "avgPowerW": 60,
+                "costPerHour": 1.5,
+                "multicolor": False,
+                "colors": 1,
+                "amsType": "Single",
+                "materials": ["Resina (MSLA/SLA)"],
+                "notes": "DLP ultra rápido. Gran detalle.",
+            },
+        }
+    },
+    "Qidi Tech": {
+        "logo": None,
+        "color": "#38bdf8",
+        "models": {
+            "X-Max 3": {
+                "type": "CoreXY",
+                "buildVolume": {"x": 325, "y": 325, "z": 315},
+                "maxSpeed": 600,
+                "maxTemp": 350,
+                "bedTemp": 120,
+                "avgPowerW": 450,
+                "costPerHour": 5.0,
+                "multicolor": False,
+                "colors": 1,
+                "amsType": "Single",
+                "materials": ["PLA", "PETG", "ABS", "ASA", "TPU", "PA", "PC", "Carbon"],
+                "notes": "2024: Mejor para materiales técnicos del mercado.",
+            },
+            "X-Plus 3": {
+                "type": "CoreXY",
+                "buildVolume": {"x": 280, "y": 280, "z": 270},
+                "maxSpeed": 600,
+                "maxTemp": 350,
+                "bedTemp": 120,
+                "avgPowerW": 380,
+                "costPerHour": 4.5,
+                "multicolor": False,
+                "colors": 1,
+                "amsType": "Single",
+                "materials": ["PLA", "PETG", "ABS", "ASA", "TPU", "PA", "PC", "Carbon"],
+                "notes": "PA, PC, CF sin problemas. Cámara calentada.",
+            },
+            "Q1 Pro": {
+                "type": "CoreXY",
+                "buildVolume": {"x": 245, "y": 245, "z": 245},
+                "maxSpeed": 600,
+                "maxTemp": 350,
+                "bedTemp": 120,
+                "avgPowerW": 350,
+                "costPerHour": 4.0,
+                "multicolor": False,
+                "colors": 1,
+                "amsType": "Single",
+                "materials": ["PLA", "PETG", "ABS", "ASA", "TPU", "PA", "PC"],
+                "notes": "2024: Alta velocidad materiales técnicos. Cámara calentada.",
+            },
+        }
+    },
+    "Bambu + Elegoo": {
+        "logo": None,
+        "color": "#fb923c",
+        "models": {},
+    },
+    "Voron": {
+        "logo": None,
+        "color": "#e879f9",
+        "models": {
+            "Voron 2.4 (350mm)": {
+                "type": "CoreXY",
+                "buildVolume": {"x": 350, "y": 350, "z": 350},
+                "maxSpeed": 500,
+                "maxTemp": 320,
+                "bedTemp": 120,
+                "avgPowerW": 600,
+                "costPerHour": 6.0,
+                "multicolor": False,
+                "colors": 1,
+                "amsType": "Canvas Hub",
+                "materials": ["PLA", "PETG", "ABS", "ASA", "PA", "PC", "Carbon"],
+                "notes": "DIY CoreXY premium. Cámara cerrada calentada.",
+            },
+            "Voron Trident (250mm)": {
+                "type": "CoreXY",
+                "buildVolume": {"x": 250, "y": 250, "z": 250},
+                "maxSpeed": 500,
+                "maxTemp": 320,
+                "bedTemp": 120,
+                "avgPowerW": 500,
+                "costPerHour": 5.5,
+                "multicolor": False,
+                "colors": 1,
+                "amsType": "Canvas Hub",
+                "materials": ["PLA", "PETG", "ABS", "ASA", "PA", "PC"],
+                "notes": "DIY. Elevación 3-Z muy estable.",
+            },
+            "Voron 0.2": {
+                "type": "CoreXY",
+                "buildVolume": {"x": 120, "y": 120, "z": 120},
+                "maxSpeed": 600,
+                "maxTemp": 300,
+                "bedTemp": 120,
+                "avgPowerW": 200,
+                "costPerHour": 3.0,
+                "multicolor": False,
+                "colors": 1,
+                "amsType": "Single",
+                "materials": ["PLA", "PETG", "ABS", "ASA", "PA"],
+                "notes": "Mini CoreXY DIY ultra veloz.",
             },
         }
     },
@@ -364,25 +779,26 @@ AMS_TYPES = ["Single", "AMS", "AMS Lite", "ACE Pro", "MMU3", "CFS", "IDEX", "Mul
 # ─── FILAMENTOS ───────────────────────────────────────────────────
 
 FILAMENT_BRANDS = {
+    # ── TOP AMAZON MX / Populares 2023-2026 ──
     "Bambu Lab": {
         "logo": "bambu.png",
         "color": "#4ade80",
-    },
-    "Sunlu": {
-        "logo": "sunlu.png",
-        "color": "#60a5fa",
-    },
-    "Polymaker": {
-        "logo": "polymaker.png",
-        "color": "#f97316",
     },
     "eSUN": {
         "logo": "esun.png",
         "color": "#fbbf24",
     },
+    "Polymaker": {
+        "logo": "polymaker.png",
+        "color": "#f97316",
+    },
+    "Sunlu": {
+        "logo": "sunlu.png",
+        "color": "#60a5fa",
+    },
     "Hatchbox": {
         "logo": "hatchbox.png",
-        "color": "#a78bfa",
+        "color": "#4ade80",
     },
     "Prusament": {
         "logo": "prusament.png",
@@ -391,6 +807,70 @@ FILAMENT_BRANDS = {
     "Overture": {
         "logo": "overture.png",
         "color": "#34d399",
+    },
+    "Inland": {
+        "logo": None,
+        "color": "#60a5fa",
+    },
+    "ERYONE": {
+        "logo": None,
+        "color": "#f472b6",
+    },
+    "MIKA3D": {
+        "logo": None,
+        "color": "#a78bfa",
+    },
+    "Creality": {
+        "logo": "creality.png",
+        "color": "#60a5fa",
+    },
+    "Anycubic": {
+        "logo": "anycubic.png",
+        "color": "#fbbf24",
+    },
+    "GEEETECH": {
+        "logo": None,
+        "color": "#38bdf8",
+    },
+    "BASICFIL": {
+        "logo": None,
+        "color": "#9ca3af",
+    },
+    "Duramic 3D": {
+        "logo": None,
+        "color": "#fb923c",
+    },
+    "TTYT3D": {
+        "logo": None,
+        "color": "#e879f9",
+    },
+    "Paramount 3D": {
+        "logo": None,
+        "color": "#22d3ee",
+    },
+    "3D Solutech": {
+        "logo": None,
+        "color": "#4ade80",
+    },
+    "FormFutura": {
+        "logo": None,
+        "color": "#f87171",
+    },
+    "ColorFabb": {
+        "logo": None,
+        "color": "#fb923c",
+    },
+    "Proto-pasta": {
+        "logo": None,
+        "color": "#a78bfa",
+    },
+    "Fiberlogy": {
+        "logo": None,
+        "color": "#34d399",
+    },
+    "Amazon Basics": {
+        "logo": None,
+        "color": "#fbbf24",
     },
     "Genérico": {
         "logo": None,
@@ -411,6 +891,10 @@ FILAMENT_TYPES = {
                 "density": 1.24, "printTemp": 210, "bedTemp": 60,
                 "costPerGram": 0.32, "notes": "Mayor resistencia que PLA estándar.",
             },
+            "PLA+ HS (Alta velocidad)": {
+                "density": 1.24, "printTemp": 225, "bedTemp": 65,
+                "costPerGram": 0.38, "notes": "Optimizado para >300mm/s.",
+            },
             "PLA Silk": {
                 "density": 1.24, "printTemp": 215, "bedTemp": 60,
                 "costPerGram": 0.40, "notes": "Acabado satinado/nacarado decorativo.",
@@ -419,13 +903,13 @@ FILAMENT_TYPES = {
                 "density": 1.24, "printTemp": 215, "bedTemp": 60,
                 "costPerGram": 0.45, "notes": "Gradiente de 2 colores en un carrete.",
             },
+            "PLA Silk Rainbow": {
+                "density": 1.24, "printTemp": 215, "bedTemp": 60,
+                "costPerGram": 0.48, "notes": "Gradiente multicolor arcoíris.",
+            },
             "PLA Matte": {
                 "density": 1.24, "printTemp": 210, "bedTemp": 60,
                 "costPerGram": 0.35, "notes": "Acabado mate, oculta capas visualmente.",
-            },
-            "PLA Rapid / HS": {
-                "density": 1.24, "printTemp": 220, "bedTemp": 60,
-                "costPerGram": 0.38, "notes": "Optimizado para alta velocidad (>300mm/s).",
             },
             "PLA Glitter": {
                 "density": 1.25, "printTemp": 205, "bedTemp": 60,
@@ -443,6 +927,26 @@ FILAMENT_TYPES = {
                 "density": 1.30, "printTemp": 210, "bedTemp": 60,
                 "costPerGram": 0.45, "notes": "Efecto mármol. Decorativo.",
             },
+            "PLA Galaxy": {
+                "density": 1.24, "printTemp": 210, "bedTemp": 60,
+                "costPerGram": 0.43, "notes": "Partículas brillantes tipo galaxia.",
+            },
+            "PLA Fluorescente": {
+                "density": 1.24, "printTemp": 205, "bedTemp": 60,
+                "costPerGram": 0.36, "notes": "Brilla bajo UV/luz negra.",
+            },
+            "PLA Luminiscente (Glow)": {
+                "density": 1.24, "printTemp": 210, "bedTemp": 60,
+                "costPerGram": 0.40, "notes": "Brilla en la oscuridad.",
+            },
+            "PLA Camaleón": {
+                "density": 1.24, "printTemp": 215, "bedTemp": 60,
+                "costPerGram": 0.50, "notes": "Cambia de color con la temperatura.",
+            },
+            "PLA CF (Fibra Carbono)": {
+                "density": 1.30, "printTemp": 220, "bedTemp": 60,
+                "costPerGram": 0.60, "notes": "Fibra de carbono. Mayor rigidez.",
+            },
         }
     },
     "PETG": {
@@ -456,13 +960,25 @@ FILAMENT_TYPES = {
                 "density": 1.27, "printTemp": 235, "bedTemp": 75,
                 "costPerGram": 0.30, "notes": "Formulación mejorada para mayor resistencia.",
             },
+            "PETG HS (Alta velocidad)": {
+                "density": 1.27, "printTemp": 245, "bedTemp": 75,
+                "costPerGram": 0.34, "notes": "Optimizado para impresión rápida.",
+            },
             "PETG CF (Fibra Carbono)": {
                 "density": 1.30, "printTemp": 250, "bedTemp": 80,
                 "costPerGram": 0.65, "notes": "Fibra de carbono. Mayor rigidez y resistencia.",
             },
+            "PETG GF (Fibra Vidrio)": {
+                "density": 1.50, "printTemp": 250, "bedTemp": 80,
+                "costPerGram": 0.60, "notes": "Fibra de vidrio. Alta rigidez.",
+            },
             "PETG Transparente": {
                 "density": 1.27, "printTemp": 225, "bedTemp": 70,
                 "costPerGram": 0.30, "notes": "Alta claridad óptica.",
+            },
+            "PETG Seda": {
+                "density": 1.27, "printTemp": 235, "bedTemp": 70,
+                "costPerGram": 0.38, "notes": "Acabado satinado. Decorativo.",
             },
         }
     },
@@ -477,6 +993,10 @@ FILAMENT_TYPES = {
                 "density": 1.04, "printTemp": 245, "bedTemp": 100,
                 "costPerGram": 0.28, "notes": "Menor warping. Formulación mejorada.",
             },
+            "ABS HS (Alta velocidad)": {
+                "density": 1.04, "printTemp": 250, "bedTemp": 110,
+                "costPerGram": 0.32, "notes": "Para impresión rápida con cámara calentada.",
+            },
             "ABS CF": {
                 "density": 1.10, "printTemp": 255, "bedTemp": 110,
                 "costPerGram": 0.60, "notes": "Con fibra de carbono. Piezas técnicas.",
@@ -489,6 +1009,10 @@ FILAMENT_TYPES = {
             "Estándar": {
                 "density": 1.07, "printTemp": 245, "bedTemp": 100,
                 "costPerGram": 0.38, "notes": "Resistente UV. Ideal para exteriores.",
+            },
+            "ASA+": {
+                "density": 1.07, "printTemp": 248, "bedTemp": 100,
+                "costPerGram": 0.42, "notes": "Formulación mejorada anti-warping.",
             },
             "ASA CF": {
                 "density": 1.15, "printTemp": 255, "bedTemp": 110,
@@ -507,9 +1031,17 @@ FILAMENT_TYPES = {
                 "density": 1.20, "printTemp": 215, "bedTemp": 40,
                 "costPerGram": 0.75, "notes": "Más suave. Durómetro 87A.",
             },
-            "TPU Rapid": {
+            "83A (Ultra-soft)": {
+                "density": 1.19, "printTemp": 210, "bedTemp": 40,
+                "costPerGram": 0.82, "notes": "Ultra flexible. Gel-like.",
+            },
+            "TPU HS (Alta velocidad)": {
                 "density": 1.21, "printTemp": 220, "bedTemp": 40,
                 "costPerGram": 0.80, "notes": "Optimizado para alta velocidad.",
+            },
+            "TPU CF": {
+                "density": 1.25, "printTemp": 225, "bedTemp": 50,
+                "costPerGram": 1.00, "notes": "TPU + fibra carbono. Resistente y flexible.",
             },
         }
     },
@@ -524,13 +1056,17 @@ FILAMENT_TYPES = {
                 "density": 1.01, "printTemp": 255, "bedTemp": 70,
                 "costPerGram": 0.90, "notes": "Nylon 12. Menor absorción de humedad.",
             },
-            "PA CF (Fibra Carbono)": {
+            "PA6-CF (Fibra Carbono)": {
                 "density": 1.20, "printTemp": 280, "bedTemp": 90,
                 "costPerGram": 1.20, "notes": "Nylon + carbono. Piezas industriales.",
             },
-            "PA GF (Fibra Vidrio)": {
+            "PA6-GF (Fibra Vidrio)": {
                 "density": 1.35, "printTemp": 275, "bedTemp": 90,
                 "costPerGram": 1.00, "notes": "Nylon + fibra de vidrio. Alta rigidez.",
+            },
+            "PA12-CF": {
+                "density": 1.10, "printTemp": 270, "bedTemp": 80,
+                "costPerGram": 1.30, "notes": "PA12 con carbono. Menor warping.",
             },
         }
     },
@@ -541,9 +1077,17 @@ FILAMENT_TYPES = {
                 "density": 1.20, "printTemp": 280, "bedTemp": 110,
                 "costPerGram": 0.70, "notes": "Transparente, alta temperatura.",
             },
+            "PC+": {
+                "density": 1.20, "printTemp": 275, "bedTemp": 110,
+                "costPerGram": 0.80, "notes": "Formulación mejorada. Menos warping.",
+            },
             "PC CF": {
                 "density": 1.25, "printTemp": 290, "bedTemp": 120,
                 "costPerGram": 1.10, "notes": "PC + fibra de carbono. Máxima rigidez.",
+            },
+            "PC/ABS": {
+                "density": 1.15, "printTemp": 265, "bedTemp": 110,
+                "costPerGram": 0.65, "notes": "Blend PC+ABS. Balance resistencia/maquinabilidad.",
             },
         }
     },
@@ -562,7 +1106,24 @@ FILAMENT_TYPES = {
             "Estándar": {
                 "density": 1.19, "printTemp": 185, "bedTemp": 45,
                 "costPerGram": 1.50, "notes": "Soporte soluble en agua. Multicolor/dual.",
-            }
+            },
+            "PVA+": {
+                "density": 1.19, "printTemp": 190, "bedTemp": 45,
+                "costPerGram": 1.70, "notes": "Fórmula mejorada. Menos higroscópico.",
+            },
+        }
+    },
+    "PEI / PEEK": {
+        "color": "#FF6B35",
+        "subtypes": {
+            "PEI (ULTEM)": {
+                "density": 1.27, "printTemp": 360, "bedTemp": 160,
+                "costPerGram": 3.50, "notes": "Alta temperatura industrial. Requiere all-metal.",
+            },
+            "PEEK": {
+                "density": 1.32, "printTemp": 400, "bedTemp": 160,
+                "costPerGram": 5.00, "notes": "Ingeniería avanzada. Impresora modificada requerida.",
+            },
         }
     },
     "Resina (MSLA/SLA)": {
@@ -576,9 +1137,25 @@ FILAMENT_TYPES = {
                 "density": 1.12, "printTemp": 0, "bedTemp": 0,
                 "costPerGram": 0.60, "notes": "Resistencia similar a ABS.",
             },
-            "Flexible": {
+            "Water-Washable": {
+                "density": 1.10, "printTemp": 0, "bedTemp": 0,
+                "costPerGram": 0.70, "notes": "Lavado con agua. Sin IPA.",
+            },
+            "Flex / Elastómero": {
                 "density": 1.10, "printTemp": 0, "bedTemp": 0,
                 "costPerGram": 0.80, "notes": "Resina flexible/elastomérica.",
+            },
+            "Plant-Based (Bio)": {
+                "density": 1.10, "printTemp": 0, "bedTemp": 0,
+                "costPerGram": 0.90, "notes": "Resina base vegetal. Menos tóxica.",
+            },
+            "8K Ultra Detail": {
+                "density": 1.10, "printTemp": 0, "bedTemp": 0,
+                "costPerGram": 1.10, "notes": "Máxima resolución. Miniaturas y joyería.",
+            },
+            "High Speed (HS)": {
+                "density": 1.10, "printTemp": 0, "bedTemp": 0,
+                "costPerGram": 0.80, "notes": "Curado rápido para impresoras HS.",
             },
         }
     },
@@ -603,16 +1180,23 @@ FILAMENT_COLORS = {
     "Cobre":         "#B87333",
     "Azul Marino":   "#0D47A1",
     "Verde Militar": "#4E6B1F",
+    "Verde Menta":   "#00BFA5",
+    "Durazno":       "#FFAB91",
+    "Turquesa":      "#00E5FF",
+    "Salmón":        "#FF6B6B",
     "Personalizado": "#888888",
 }
 
 # ─── ESTADOS DE ÓRDENES ───────────────────────────────────────────
 ORDER_STATUSES = {
-    "pending":     {"label": "Pendiente",   "color": "#fbbf24"},
-    "in-progress": {"label": "En proceso",  "color": "#60a5fa"},
-    "completed":   {"label": "Completada",  "color": "#4ade80"},
-    "cancelled":   {"label": "Cancelada",   "color": "#f87171"},
-    "delivered":   {"label": "Entregada",   "color": "#a78bfa"},
+    "pending":     {"label": "Pendiente",        "color": "#fbbf24"},
+    "in-progress": {"label": "En proceso",       "color": "#60a5fa"},
+    "completed":   {"label": "Completada",       "color": "#4ade80"},
+    "cancelled":   {"label": "Cancelada",        "color": "#f87171"},
+    "delivered":   {"label": "Entregada",        "color": "#a78bfa"},
+    "paid":        {"label": "Pagado",           "color": "#4ade80"},
+    "partial":     {"label": "Anticipo pagado",  "color": "#fbbf24"},
+    "unpaid":      {"label": "No pagado",        "color": "#f87171"},
 }
 
 # ─── CONFIGURACIÓN INICIAL ────────────────────────────────────────

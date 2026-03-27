@@ -33,7 +33,6 @@ DEFAULT_CONFIG = {
     "tema": "dark",
 }
 
-# ── Asegurar carpeta data ──────────────────────────────────────────
 os.makedirs(os.path.join(BASE_DIR, "data"), exist_ok=True)
 
 
@@ -51,10 +50,38 @@ def _save(key, data):
 
 
 def _calc_item(item, materials, printers, cfg):
+    """Calcula costo de una pieza. Soporta modo 'alreadyPrinted'."""
     mat     = next((m for m in materials if m["id"] == item.get("materialId")), None)
     printer = next((p for p in printers  if p["id"] == item.get("printerId")),  None)
+
+    already_printed = item.get("alreadyPrinted", False)
+
+    if already_printed:
+        # Modo: ya está impreso — solo material y post-proceso
+        filament_cost = float(item.get("filamentCost", 0) or 0)
+        if filament_cost > 0:
+            cost_mat = filament_cost
+        elif mat:
+            cost_mat = float(item.get("weight", 0)) * float(mat.get("costPerGram", 0))
+        else:
+            cost_mat = 0.0
+        post_cost = float(item.get("postCost", 0) or 0)
+        sub   = cost_mat + post_cost
+        sub_m = sub   * (1 + float(cfg.get("merma",   0.05)))
+        final = sub_m * (1 + float(cfg.get("margen", 0.15)))
+        return {
+            "costMaterial":  round(cost_mat,  2),
+            "costMachine":   0.0,
+            "costElec":      0.0,
+            "multiExtra":    round(post_cost, 2),
+            "subtotal":      round(sub,       2),
+            "subtotalMerma": round(sub_m,     2),
+            "precioFinal":   round(final,     2),
+        }
+
     if not mat or not printer:
         return None
+
     w  = float(item.get("weight", 0))
     t  = float(item.get("time",   0))
     cost_mat  = w * float(mat.get("costPerGram", 0))
@@ -80,11 +107,10 @@ def _calc_item(item, materials, printers, cfg):
 
 
 # ══════════════════════════════════════════════════════════════════
-#  API EXPUESTA AL FRONTEND (métodos accesibles desde JS)
+#  API
 # ══════════════════════════════════════════════════════════════════
 
 class API:
-    """Cada método público es callable desde JS con window.pywebview.api.metodo()"""
 
     # ── Config ────────────────────────────────────────────────────
 
@@ -100,10 +126,6 @@ class API:
 
     def get_printers(self):
         return _load("printers", [])
-
-    def save_printers(self, data):
-        _save("printers", data)
-        return {"ok": True}
 
     def add_printer(self, data):
         printers = _load("printers", [])
@@ -135,10 +157,6 @@ class API:
 
     def get_materials(self):
         return _load("materials", [])
-
-    def save_materials(self, data):
-        _save("materials", data)
-        return {"ok": True}
 
     def add_material(self, data):
         materials = _load("materials", [])
@@ -185,11 +203,11 @@ class API:
     def save_order(self, order_data):
         orders = _load("orders", [])
         cfg    = {**DEFAULT_CONFIG, **_load("config", {})}
-        order_data["id"]        = str(uuid.uuid4())
-        order_data["folio"]     = f"ORD-{len(orders)+1:04d}"
-        order_data["createdAt"] = datetime.now().isoformat()
-        order_data["status"]    = "pending"
-        # Recalcular total server-side
+        order_data["id"]           = str(uuid.uuid4())
+        order_data["folio"]        = f"ORD-{len(orders)+1:04d}"
+        order_data["createdAt"]    = datetime.now().isoformat()
+        order_data["status"]       = "pending"
+        order_data["paymentStatus"] = order_data.get("paymentStatus", "unpaid")
         materials = _load("materials", [])
         printers  = _load("printers",  [])
         total = sum(
@@ -206,6 +224,17 @@ class API:
         for o in orders:
             if o["id"] == order_id:
                 o["status"] = status
+        _save("orders", orders)
+        return {"ok": True}
+
+    def update_payment_status(self, order_id, pay_status):
+        """Actualiza el estado de pago: paid / partial / unpaid"""
+        orders = _load("orders", [])
+        for o in orders:
+            if o["id"] == order_id:
+                o["paymentStatus"] = pay_status
+                if pay_status == "paid":
+                    o["paidAt"] = datetime.now().isoformat()
         _save("orders", orders)
         return {"ok": True}
 
@@ -248,7 +277,7 @@ class API:
                 results.append({})
         return {"items": results, "total": round(total, 2)}
 
-    # ── Stats para dashboard ───────────────────────────────────────
+    # ── Stats ──────────────────────────────────────────────────────
 
     def get_stats(self):
         orders    = _load("orders",    [])
@@ -258,38 +287,38 @@ class API:
         completed = [o for o in orders if o.get("status") == "completed"]
         pending   = [o for o in orders if o.get("status") == "pending"]
         inprog    = [o for o in orders if o.get("status") == "in-progress"]
-        revenue   = sum(o.get("total", 0) for o in completed)
-        expected  = sum(o.get("total", 0) for o in pending + inprog)
+        paid_orders = [o for o in orders if o.get("paymentStatus") == "paid"]
         low_stock = [
             m for m in materials
             if (float(m.get("spoolWeight", 1000)) - float(m.get("usedGrams", 0)))
                / max(float(m.get("spoolWeight", 1000)), 1) < 0.20
         ]
+        revenue   = sum(o.get("total", 0) for o in paid_orders)
+        expected  = sum(o.get("total", 0) for o in pending + inprog)
         return {
-            "totalOrders":     len(orders),
-            "pending":         len(pending),
-            "inProgress":      len(inprog),
-            "completed":       len(completed),
-            "revenue":         round(revenue, 2),
-            "expected":        round(expected, 2),
-            "activePrinters":  sum(1 for p in printers if p.get("active", True)),
-            "totalPrinters":   len(printers),
-            "totalMaterials":  len(materials),
-            "lowStock":        len(low_stock),
-            "moneda":          cfg.get("moneda", "MXN"),
+            "totalOrders":    len(orders),
+            "pending":        len(pending),
+            "inProgress":     len(inprog),
+            "completed":      len(completed),
+            "revenue":        round(revenue, 2),
+            "expected":       round(expected, 2),
+            "activePrinters": sum(1 for p in printers if p.get("active", True)),
+            "totalPrinters":  len(printers),
+            "totalMaterials": len(materials),
+            "lowStock":       len(low_stock),
+            "moneda":         cfg.get("moneda", "MXN"),
         }
 
-    # ── Catálogos (para dropdowns) ─────────────────────────────────
+    # ── Catálogos ─────────────────────────────────────────────────
 
     def get_catalogs(self):
-        """Devuelve los catálogos de marcas/modelos al frontend."""
         from data.constants import PRINTER_BRANDS, FILAMENT_BRANDS, FILAMENT_TYPES, FILAMENT_COLORS, AMS_TYPES
         return {
-            "printerBrands": PRINTER_BRANDS,
+            "printerBrands":  PRINTER_BRANDS,
             "filamentBrands": FILAMENT_BRANDS,
-            "filamentTypes": FILAMENT_TYPES,
+            "filamentTypes":  FILAMENT_TYPES,
             "filamentColors": FILAMENT_COLORS,
-            "amsTypes": AMS_TYPES,
+            "amsTypes":       AMS_TYPES,
         }
 
 
@@ -300,13 +329,13 @@ class API:
 if __name__ == "__main__":
     api    = API()
     window = webview.create_window(
-        title      = "⬡ Print3D Pro",
-        url        = HTML_FILE,
-        js_api     = api,
-        width      = 1340,
-        height     = 820,
-        min_size   = (1100, 680),
-        resizable  = True,
+        title            = "⬡ Print3D Pro",
+        url              = HTML_FILE,
+        js_api           = api,
+        width            = 1340,
+        height           = 820,
+        min_size         = (1100, 680),
+        resizable        = True,
         background_color = "#0a0a0a",
     )
     webview.start(debug=False)

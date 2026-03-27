@@ -1,7 +1,7 @@
 {
-  "negocio": "Mi Taller 3D",
+  "negocio": "Jose Pardiñaz",
   "contacto": "",
-  "merma": 0.05,
+  "merma": 0.1,
   "margen": 0.15,
   "electricidad_kwh": 0.9,
   "moneda": "MXN",

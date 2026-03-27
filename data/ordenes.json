@@ -20,6 +20,8 @@
     "folio": "ORD-0001",
     "createdAt": "2026-03-26T19:52:01.028119",
     "status": "delivered",
-    "total": 165.9
+    "total": 165.9,
+    "paymentStatus": "unpaid",
+    "paidAt": "2026-03-26T21:11:55.540586"
   }
 ]

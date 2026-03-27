@@ -1,24 +1,46 @@
 [
   {
     "id": "5e0a6c56-357d-4276-ba06-1ea302bef8c6",
-    "name": "Creality Ender 3 V3 SE",
+    "name": "Creality Ender 3 S1",
     "brand": "Creality",
-    "model": "Ender 3 V3 SE",
+    "model": "Ender 3 S1 Pro",
     "type": "Cartesiana",
-    "costPerHour": 1.8,
-    "avgPowerW": 165,
+    "costPerHour": 2,
+    "avgPowerW": 180,
     "buildVolume": {
       "x": 220,
       "y": 220,
-      "z": 250
+      "z": 270
     },
-    "maxTemp": 260,
+    "maxTemp": 300,
     "bedTemp": 100,
-    "maxSpeed": 250,
+    "maxSpeed": 150,
     "amsType": "Single",
     "colors": 1,
     "multicolor": false,
-    "notes": "Auto-nivelación CR Touch. Entrada al mundo 3D.",
+    "notes": "Extrusor directo Sprite Pro. Pantalla táctil.",
+    "active": true
+  },
+  {
+    "id": "bf6badcf-8c56-4655-bc47-bd41a2a8e534",
+    "name": "ECC2",
+    "brand": "Elegoo",
+    "model": "Centauri Carbon",
+    "type": "CoreXY",
+    "costPerHour": 4.5,
+    "avgPowerW": 380,
+    "buildVolume": {
+      "x": 350,
+      "y": 350,
+      "z": 350
+    },
+    "maxTemp": 320,
+    "bedTemp": 120,
+    "maxSpeed": 500,
+    "amsType": "Canvas Hub",
+    "colors": 4,
+    "multicolor": true,
+    "notes": "2025: CoreXY premium materiales abrasivos.",
     "active": true
   }
 ]
