@@ -1,9 +1,13 @@
 {
   "negocio": "Jose Pardiñaz",
-  "contacto": "",
-  "merma": 0.1,
-  "margen": 0.15,
+  "contacto": "jose.pardinaz@anahuacmayab.edu.mx",
+  "merma": 0.11,
+  "margen": 0.28,
   "electricidad_kwh": 0.9,
   "moneda": "MXN",
-  "tema": "dark"
+  "tema": "dark",
+  "auto_discount": true,
+  "terminos": "El precio incluye impresión 3D según especificaciones acordadas. No se aceptan cambios gratuitos una vez iniciada la impresión. Los archivos de diseño no se incluyen en el servicio.",
+  "garantia": "Garantía de 3 días por defectos visibles de fabricación. No aplica por mal uso, calor excesivo, o modificaciones del producto. Material PLA puede deformarse a >60°C. PETG se recomienda para mecanismos.",
+  "notas_ticket": ""
 }

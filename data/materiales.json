@@ -62,5 +62,23 @@
     "bedTemp": 75,
     "density": 1.27,
     "notes": ""
+  },
+  {
+    "id": "5a75e8c3-97cd-4076-8957-3d8cfd15af89",
+    "name": "TPU A95 - NEGRO",
+    "brand": "eSUN",
+    "baseType": "TPU",
+    "subtype": "95A (Standard)",
+    "color": "#1a1a1a",
+    "costPerGram": 0.499,
+    "spoolCost": 499,
+    "spoolWeight": 1000,
+    "usedGrams": 350,
+    "printTemp": 210,
+    "bedTemp": 40,
+    "density": 1.21,
+    "notes": "",
+    "logo": null,
+    "archived": false
   }
 ]

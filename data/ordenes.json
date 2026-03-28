@@ -19,9 +19,46 @@
     "id": "13b43732-29ee-4c86-bf34-380dd64d77df",
     "folio": "ORD-0001",
     "createdAt": "2026-03-26T19:52:01.028119",
-    "status": "delivered",
+    "status": "pending",
     "total": 165.9,
     "paymentStatus": "unpaid",
-    "paidAt": "2026-03-26T21:11:55.540586"
+    "paidAt": "2026-03-26T22:57:01.122172",
+    "partialAmount": 0.0,
+    "fabricationStatus": "fab-shipped"
+  },
+  {
+    "clientName": "Alberto",
+    "clientEmail": "N/A",
+    "clientPhone": "N/A",
+    "notes": "",
+    "items": [
+      {
+        "id": "79d7cfbe-7f8b-4667-a42d-583d81d0f173",
+        "name": "Engranajes",
+        "materialId": "b059aeee-cad5-41de-80d7-3cb2246991bf",
+        "printerId": "bf6badcf-8c56-4655-bc47-bd41a2a8e534",
+        "weight": 186,
+        "time": 12,
+        "qty": 1
+      },
+      {
+        "id": "56f52c5e-5ae9-4651-803c-032f0618c733",
+        "name": "Caja de torque",
+        "materialId": "940d8e0b-a8e5-4a96-bae2-037da3a7310b",
+        "printerId": "bf6badcf-8c56-4655-bc47-bd41a2a8e534",
+        "weight": 135,
+        "time": 8,
+        "qty": 1
+      }
+    ],
+    "paymentStatus": "paid",
+    "fabricationStatus": "fab-shipped",
+    "id": "c228502e-1248-4d76-a3e2-014cf3a677bc",
+    "folio": "ORD-0002",
+    "createdAt": "2026-03-28T00:40:59.842578",
+    "status": "delivered",
+    "total": 279.51,
+    "paidAt": "2026-03-28T00:41:13.150226",
+    "partialAmount": 0.0
   }
 ]

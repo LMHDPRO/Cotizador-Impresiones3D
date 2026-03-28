@@ -31,6 +31,7 @@ DEFAULT_CONFIG = {
     "electricidad_kwh": 0.9,
     "moneda": "MXN",
     "tema": "dark",
+    "auto_discount": True,
 }
 
 os.makedirs(os.path.join(BASE_DIR, "data"), exist_ok=True)
@@ -50,34 +51,9 @@ def _save(key, data):
 
 
 def _calc_item(item, materials, printers, cfg):
-    """Calcula costo de una pieza. Soporta modo 'alreadyPrinted'."""
+    """Calcula costo de una pieza."""
     mat     = next((m for m in materials if m["id"] == item.get("materialId")), None)
     printer = next((p for p in printers  if p["id"] == item.get("printerId")),  None)
-
-    already_printed = item.get("alreadyPrinted", False)
-
-    if already_printed:
-        # Modo: ya está impreso — solo material y post-proceso
-        filament_cost = float(item.get("filamentCost", 0) or 0)
-        if filament_cost > 0:
-            cost_mat = filament_cost
-        elif mat:
-            cost_mat = float(item.get("weight", 0)) * float(mat.get("costPerGram", 0))
-        else:
-            cost_mat = 0.0
-        post_cost = float(item.get("postCost", 0) or 0)
-        sub   = cost_mat + post_cost
-        sub_m = sub   * (1 + float(cfg.get("merma",   0.05)))
-        final = sub_m * (1 + float(cfg.get("margen", 0.15)))
-        return {
-            "costMaterial":  round(cost_mat,  2),
-            "costMachine":   0.0,
-            "costElec":      0.0,
-            "multiExtra":    round(post_cost, 2),
-            "subtotal":      round(sub,       2),
-            "subtotalMerma": round(sub_m,     2),
-            "precioFinal":   round(final,     2),
-        }
 
     if not mat or not printer:
         return None
@@ -87,19 +63,15 @@ def _calc_item(item, materials, printers, cfg):
     cost_mat  = w * float(mat.get("costPerGram", 0))
     cost_mach = float(printer.get("costPerHour", 0)) * t
     cost_elec = (float(printer.get("avgPowerW", 200)) / 1000) * float(cfg.get("electricidad_kwh", 0.9)) * t
-    multi = sum(
-        float(layer.get("purgeGrams", 5)) *
-        float(next((m for m in materials if m["id"] == layer.get("materialId")), {}).get("costPerGram", 0))
-        for layer in item.get("multicolorLayers", [])
-    )
-    sub   = cost_mat + cost_mach + multi
+    
+    sub   = cost_mat + cost_mach + cost_elec
     sub_m = sub   * (1 + float(cfg.get("merma",   0.05)))
     final = sub_m * (1 + float(cfg.get("margen", 0.15)))
+    
     return {
         "costMaterial":  round(cost_mat,  2),
         "costMachine":   round(cost_mach, 2),
         "costElec":      round(cost_elec, 2),
-        "multiExtra":    round(multi,     2),
         "subtotal":      round(sub,       2),
         "subtotalMerma": round(sub_m,     2),
         "precioFinal":   round(final,     2),
@@ -176,6 +148,14 @@ class API:
         _save("materials", materials)
         return {"ok": True}
 
+    def toggle_archive_material(self, mat_id):
+        materials = _load("materials", [])
+        for m in materials:
+            if m["id"] == mat_id:
+                m["archived"] = not m.get("archived", False)
+        _save("materials", materials)
+        return {"ok": True}
+
     def discount_material(self, mat_id, grams):
         materials = _load("materials", [])
         for m in materials:
@@ -206,8 +186,8 @@ class API:
         order_data["id"]           = str(uuid.uuid4())
         order_data["folio"]        = f"ORD-{len(orders)+1:04d}"
         order_data["createdAt"]    = datetime.now().isoformat()
-        order_data["status"]       = "pending"
         order_data["paymentStatus"] = order_data.get("paymentStatus", "unpaid")
+        order_data["fabricationStatus"] = order_data.get("fabricationStatus", "fab-pending")
         materials = _load("materials", [])
         printers  = _load("printers",  [])
         total = sum(
@@ -219,22 +199,46 @@ class API:
         _save("orders", orders)
         return {"ok": True, "order": order_data}
 
-    def update_order_status(self, order_id, status):
+    def update_fabrication_status(self, order_id, fab_status):
         orders = _load("orders", [])
+        cfg    = {**DEFAULT_CONFIG, **_load("config", {})}
+        materials = _load("materials", [])
+        
         for o in orders:
             if o["id"] == order_id:
-                o["status"] = status
+                o["fabricationStatus"] = fab_status
+                
+                # Descuento Automático de Filamento
+                if fab_status in ["fab-done", "fab-shipped"] and cfg.get("auto_discount", True):
+                    # Solo descontar si no se ha descontado antes
+                    if not o.get("filamentDeducted", False):
+                        for item in o.get("items", []):
+                            mat_id = item.get("materialId")
+                            weight = float(item.get("weight", 0)) * int(item.get("qty", 1))
+                            for m in materials:
+                                if m["id"] == mat_id:
+                                    m["usedGrams"] = min(float(m.get("spoolWeight", 1000)), float(m.get("usedGrams", 0)) + weight)
+                        
+                        o["filamentDeducted"] = True
+                        _save("materials", materials)
+
         _save("orders", orders)
         return {"ok": True}
 
-    def update_payment_status(self, order_id, pay_status):
-        """Actualiza el estado de pago: paid / partial / unpaid"""
+    def update_payment_status(self, order_id, pay_status, partial_amount=0):
         orders = _load("orders", [])
         for o in orders:
             if o["id"] == order_id:
                 o["paymentStatus"] = pay_status
-                if pay_status == "paid":
-                    o["paidAt"] = datetime.now().isoformat()
+                if pay_status == "partial":
+                    o["partialAmount"] = float(partial_amount)
+                else:
+                    o["partialAmount"] = 0.0
+                
+                if pay_status == "cancelled":
+                    o["fabricationStatus"] = "cancelled"
+                    o["status"] = "cancelled"
+                    
         _save("orders", orders)
         return {"ok": True}
 
@@ -284,24 +288,18 @@ class API:
         materials = _load("materials", [])
         printers  = _load("printers",  [])
         cfg       = {**DEFAULT_CONFIG, **_load("config", {})}
-        completed = [o for o in orders if o.get("status") == "completed"]
-        pending   = [o for o in orders if o.get("status") == "pending"]
-        inprog    = [o for o in orders if o.get("status") == "in-progress"]
+        
         paid_orders = [o for o in orders if o.get("paymentStatus") == "paid"]
         low_stock = [
             m for m in materials
             if (float(m.get("spoolWeight", 1000)) - float(m.get("usedGrams", 0)))
-               / max(float(m.get("spoolWeight", 1000)), 1) < 0.20
+               / max(float(m.get("spoolWeight", 1000)), 1) < 0.20 and not m.get("archived", False)
         ]
         revenue   = sum(o.get("total", 0) for o in paid_orders)
-        expected  = sum(o.get("total", 0) for o in pending + inprog)
+        
         return {
             "totalOrders":    len(orders),
-            "pending":        len(pending),
-            "inProgress":     len(inprog),
-            "completed":      len(completed),
             "revenue":        round(revenue, 2),
-            "expected":       round(expected, 2),
             "activePrinters": sum(1 for p in printers if p.get("active", True)),
             "totalPrinters":  len(printers),
             "totalMaterials": len(materials),
@@ -332,8 +330,8 @@ if __name__ == "__main__":
         title            = "⬡ Print3D Pro",
         url              = HTML_FILE,
         js_api           = api,
-        width            = 1340,
-        height           = 820,
+        width            = 1440,
+        height           = 900,
         min_size         = (1100, 680),
         resizable        = True,
         background_color = "#0a0a0a",
