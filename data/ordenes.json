@@ -1,32 +1,5 @@
 [
   {
-    "clientName": "Charly",
-    "clientEmail": "N/A",
-    "clientPhone": "N/A",
-    "notes": "Es charli",
-    "items": [
-      {
-        "id": "9a7dbc7e-c5b4-4000-83e3-f021d257c044",
-        "name": "Pieza 1",
-        "materialId": "57b30135-ac18-42e5-82a3-249f566e6849",
-        "printerId": "5e0a6c56-357d-4276-ba06-1ea302bef8c6",
-        "weight": 100,
-        "time": 6,
-        "qty": 3,
-        "multicolorLayers": []
-      }
-    ],
-    "id": "13b43732-29ee-4c86-bf34-380dd64d77df",
-    "folio": "ORD-0001",
-    "createdAt": "2026-03-26T19:52:01.028119",
-    "status": "pending",
-    "total": 165.9,
-    "paymentStatus": "unpaid",
-    "paidAt": "2026-03-26T22:57:01.122172",
-    "partialAmount": 0.0,
-    "fabricationStatus": "fab-shipped"
-  },
-  {
     "clientName": "Alberto",
     "clientEmail": "N/A",
     "clientPhone": "N/A",
